@@ -2,7 +2,7 @@
 
 Client-side Fabric addon for Cobblemon 1.7.3 on Minecraft 1.21.1.
 
-This fixes resource packs that provide separate Cobblemon Pokemon `ambient` and `cry` sounds by following Cobblemon's cry animation event and suppressing only that same Pokemon's ambient sound while the cry animation is starting. Wild Pokemon still play their normal ambient sounds, and cry audio remains synced to Cobblemon's cry animations.
+This fixes resource packs that provide separate Cobblemon Pokemon `ambient` and `cry` sounds by following Cobblemon's server-requested `cry` animation packets and suppressing only that same Pokemon's ambient sound while the cry animation is starting. Wild Pokemon still play their normal ambient sounds, and cry audio remains synced to Cobblemon's cry animations.
 
 Built jar:
 
