@@ -3,7 +3,8 @@
   "package": "com.animon.fix.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "EntityAmbientSoundMixin"
+    "EntityAmbientSoundMixin",
+    "SoundManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
