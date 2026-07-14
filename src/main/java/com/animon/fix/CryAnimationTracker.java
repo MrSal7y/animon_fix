@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class CryAnimationTracker {
-    private static final long CRY_START_WINDOW_MS = 1200L;
+    private static final long CRY_START_WINDOW_MS = 5000L;
     private static final Map<UUID, Long> CRY_WINDOWS = new HashMap<>();
 
     private CryAnimationTracker() {
