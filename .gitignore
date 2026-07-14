@@ -1,1 +1,7 @@
 desktop.ini
+.gradle/
+build/
+tools/
+decompiled/
+cobblemon_classes/
+assets/
