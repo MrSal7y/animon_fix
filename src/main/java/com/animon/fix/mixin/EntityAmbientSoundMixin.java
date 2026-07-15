@@ -24,7 +24,7 @@ public abstract class EntityAmbientSoundMixin {
             return;
         }
 
-        if (CryAnimationTracker.shouldSuppressAmbient(pokemonEntity)) {
+        if (!pokemonEntity.getPokemon().isWild() || CryAnimationTracker.shouldSuppressAmbient(pokemonEntity)) {
             ci.cancel();
         }
     }

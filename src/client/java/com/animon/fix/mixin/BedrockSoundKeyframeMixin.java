@@ -23,11 +23,11 @@ public abstract class BedrockSoundKeyframeMixin {
             cancellable = true
     )
     private void animonFix$cancelAmbientDuringCry(Entity entity, PosableState state, CallbackInfo ci) {
-        if (!(entity instanceof PokemonEntity) || !isPokemonAmbientSound(this.getSound())) {
+        if (!(entity instanceof PokemonEntity pokemonEntity) || !isPokemonAmbientSound(this.getSound())) {
             return;
         }
 
-        if (CryAnimationTracker.shouldSuppressAmbient(entity)) {
+        if (!pokemonEntity.getPokemon().isWild() || CryAnimationTracker.shouldSuppressAmbient(entity)) {
             ci.cancel();
         }
     }
