@@ -1,6 +1,6 @@
 # Animon Ambient Cry Fix
 
-Client-side Fabric addon for Cobblemon 1.7.3 on Minecraft 1.21.1.
+Client-side Fabric and NeoForge addon for Cobblemon 1.7.3 on Minecraft 1.21.1.
 
 This mod is intended to be used alongside the Animon resource pack. It can also help any other Cobblemon resource pack that adds separate Pokemon ambient sounds and cry sounds.
 
@@ -25,6 +25,7 @@ Built jar:
 
 ```text
 build/libs/animon-fix-1.0.0.jar
+neoforge/build/libs/animon-fix-neoforge-1.0.0.jar
 ```
 
 Build it again with:
@@ -32,3 +33,5 @@ Build it again with:
 ```powershell
 .\gradlew.bat build
 ```
+
+Forge note: Cobblemon 1.7.3 for Minecraft 1.21.1 is available for Fabric and NeoForge, so this project builds those two platforms.

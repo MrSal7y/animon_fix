@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "com.animon.fix.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BedrockSoundKeyframeMixin",
+    "EntityAmbientSoundMixin",
+    "MinecraftClientTickMixin",
+    "PokemonClientDelegateCryMixin",
+    "PosableStateCryAnimationMixin",
+    "PlayPosableAnimationHandlerMixin",
+    "SoundManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
