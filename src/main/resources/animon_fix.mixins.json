@@ -7,7 +7,8 @@
     "EntityAmbientSoundMixin",
     "PokemonClientDelegateCryMixin",
     "PosableStateCryAnimationMixin",
-    "PlayPosableAnimationHandlerMixin"
+    "PlayPosableAnimationHandlerMixin",
+    "SoundManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
