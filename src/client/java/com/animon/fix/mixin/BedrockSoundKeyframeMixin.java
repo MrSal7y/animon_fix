@@ -23,19 +23,31 @@ public abstract class BedrockSoundKeyframeMixin {
             cancellable = true
     )
     private void animonFix$cancelAmbientDuringCry(Entity entity, PosableState state, CallbackInfo ci) {
-        if (!(entity instanceof PokemonEntity pokemonEntity) || !isPokemonAmbientSound(this.getSound())) {
+        Identifier sound = this.getSound();
+        if (!isPokemonSound(sound) || isPokemonCry(sound)) {
             return;
         }
 
-        if (!pokemonEntity.getPokemon().isWild() || CryAnimationTracker.shouldSuppressAmbient(entity)) {
+        if (entity instanceof PokemonEntity pokemonEntity) {
+            if (!pokemonEntity.getPokemon().isWild() || CryAnimationTracker.shouldSuppressAmbient(entity)) {
+                ci.cancel();
+            }
+            return;
+        }
+
+        if (CryAnimationTracker.isAnyCryActive()) {
             ci.cancel();
         }
     }
 
-    private static boolean isPokemonAmbientSound(Identifier id) {
+    private static boolean isPokemonSound(Identifier id) {
         String path = id.getPath();
         return "cobblemon".equals(id.getNamespace())
-                && path.startsWith("pokemon.")
-                && (path.endsWith(".ambient") || path.endsWith("_ambient"));
+                && path.startsWith("pokemon.");
+    }
+
+    private static boolean isPokemonCry(Identifier id) {
+        String path = id.getPath();
+        return path.endsWith(".cry") || path.endsWith("_cry");
     }
 }

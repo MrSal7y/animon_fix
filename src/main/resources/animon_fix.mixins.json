@@ -6,6 +6,7 @@
     "BedrockSoundKeyframeMixin",
     "EntityAmbientSoundMixin",
     "PokemonClientDelegateCryMixin",
+    "PosableStateCryAnimationMixin",
     "PlayPosableAnimationHandlerMixin"
   ],
   "injectors": {

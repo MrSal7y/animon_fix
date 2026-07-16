@@ -10,15 +10,17 @@ import java.util.UUID;
 public final class CryAnimationTracker {
     private static final long CRY_START_WINDOW_MS = 5000L;
     private static final Map<UUID, Long> CRY_WINDOWS = new HashMap<>();
+    private static long anyCryWindowExpiresAt;
 
     private CryAnimationTracker() {
     }
 
     public static void markCryStarted(Entity entity) {
+        long now = System.currentTimeMillis();
+        anyCryWindowExpiresAt = now + CRY_START_WINDOW_MS;
         if (entity == null) {
             return;
         }
-        long now = System.currentTimeMillis();
         prune(now);
         CRY_WINDOWS.put(entity.getUuid(), now + CRY_START_WINDOW_MS);
     }
@@ -33,7 +35,16 @@ public final class CryAnimationTracker {
         return expiresAt != null && expiresAt >= now;
     }
 
+    public static boolean isAnyCryActive() {
+        long now = System.currentTimeMillis();
+        prune(now);
+        return anyCryWindowExpiresAt >= now;
+    }
+
     private static void prune(long now) {
+        if (anyCryWindowExpiresAt < now) {
+            anyCryWindowExpiresAt = 0L;
+        }
         Iterator<Map.Entry<UUID, Long>> iterator = CRY_WINDOWS.entrySet().iterator();
         while (iterator.hasNext()) {
             if (iterator.next().getValue() < now) {

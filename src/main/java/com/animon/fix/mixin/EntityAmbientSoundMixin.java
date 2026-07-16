@@ -20,7 +20,7 @@ public abstract class EntityAmbientSoundMixin {
         }
 
         Identifier id = sound.getId();
-        if (!"cobblemon".equals(id.getNamespace()) || !isPokemonAmbientSound(id.getPath())) {
+        if (!isPokemonSound(id) || isPokemonCry(id)) {
             return;
         }
 
@@ -29,7 +29,12 @@ public abstract class EntityAmbientSoundMixin {
         }
     }
 
-    private static boolean isPokemonAmbientSound(String path) {
-        return path.startsWith("pokemon.") && (path.endsWith(".ambient") || path.endsWith("_ambient"));
+    private static boolean isPokemonSound(Identifier id) {
+        return "cobblemon".equals(id.getNamespace()) && id.getPath().startsWith("pokemon.");
+    }
+
+    private static boolean isPokemonCry(Identifier id) {
+        String path = id.getPath();
+        return path.endsWith(".cry") || path.endsWith("_cry");
     }
 }
