@@ -36,6 +36,10 @@ public final class ClientPokemonSoundFilter {
         return isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound);
     }
 
+    public static boolean hasRecentCry(Identifier id) {
+        return isRecentMatchingCry(id);
+    }
+
     private static void markCry(Identifier id) {
         long now = System.currentTimeMillis();
         prune(now);

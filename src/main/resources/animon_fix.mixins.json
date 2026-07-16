@@ -5,6 +5,7 @@
   "client": [
     "BedrockSoundKeyframeMixin",
     "EntityAmbientSoundMixin",
+    "MinecraftClientTickMixin",
     "PokemonClientDelegateCryMixin",
     "PosableStateCryAnimationMixin",
     "PlayPosableAnimationHandlerMixin",

@@ -1,6 +1,7 @@
 package com.animon.fix.mixin;
 
 import com.animon.fix.CryAnimationTracker;
+import com.animon.fix.FallbackCryScheduler;
 import com.cobblemon.mod.common.client.render.models.blockbench.PosableState;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,7 +21,9 @@ public abstract class PosableStateCryAnimationMixin {
     private void animonFix$trackQueuedCryAnimation(Set<String> animations, CallbackInfo ci) {
         for (String animation : animations) {
             if (animation.contains("cry")) {
-                CryAnimationTracker.markCryStarted(this.getEntity());
+                Entity entity = this.getEntity();
+                CryAnimationTracker.markCryStarted(entity);
+                FallbackCryScheduler.schedule(entity);
                 return;
             }
         }
