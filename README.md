@@ -24,7 +24,7 @@ Put the built jar in your client `mods` folder alongside:
 Built jar:
 
 ```text
-build/libs/animon-fix-1.0.0.jar
+build/libs/animon-fix-fabric-1.0.0.jar
 neoforge/build/libs/animon-fix-neoforge-1.0.0.jar
 ```
 
@@ -34,4 +34,4 @@ Build it again with:
 .\gradlew.bat build
 ```
 
-Forge note: Cobblemon 1.7.3 for Minecraft 1.21.1 is available for Fabric and NeoForge, so this project builds those two platforms.
+Forge note: the public Cobblemon 1.7.3 files for Minecraft 1.21.1 are Fabric and NeoForge, so this project currently builds those two platforms.
