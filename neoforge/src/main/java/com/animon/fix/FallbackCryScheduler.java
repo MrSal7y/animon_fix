@@ -19,10 +19,6 @@ public final class FallbackCryScheduler {
     }
 
     public static void schedule(Entity entity) {
-        if (!AnimonFixConfig.resourceCries()) {
-            return;
-        }
-
         if (!(entity instanceof PokemonEntity pokemonEntity)) {
             return;
         }
@@ -32,11 +28,6 @@ public final class FallbackCryScheduler {
     }
 
     public static void tick(Minecraft client) {
-        if (!AnimonFixConfig.resourceCries()) {
-            PENDING_CRIES.clear();
-            return;
-        }
-
         if (client.level == null || PENDING_CRIES.isEmpty()) {
             PENDING_CRIES.clear();
             return;
@@ -66,7 +57,7 @@ public final class FallbackCryScheduler {
                     entity.getZ(),
                     SoundEvent.createVariableRangeEvent(pendingCry.soundId),
                     pokemonEntity.getSoundSource(),
-                    1.0F,
+                    AnimonFixConfig.cryVoiceVolume(),
                     1.0F,
                     false
             );

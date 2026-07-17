@@ -19,10 +19,6 @@ public final class FallbackCryScheduler {
     }
 
     public static void schedule(Entity entity) {
-        if (!AnimonFixConfig.resourceCries()) {
-            return;
-        }
-
         if (!(entity instanceof PokemonEntity pokemonEntity)) {
             return;
         }
@@ -32,11 +28,6 @@ public final class FallbackCryScheduler {
     }
 
     public static void tick(MinecraftClient client) {
-        if (!AnimonFixConfig.resourceCries()) {
-            PENDING_CRIES.clear();
-            return;
-        }
-
         if (client.world == null || PENDING_CRIES.isEmpty()) {
             PENDING_CRIES.clear();
             return;
@@ -60,7 +51,7 @@ public final class FallbackCryScheduler {
                 continue;
             }
 
-            client.world.playSoundFromEntity(entity, SoundEvent.of(pendingCry.soundId), pokemonEntity.getSoundCategory(), 1.0F, 1.0F);
+            client.world.playSoundFromEntity(entity, SoundEvent.of(pendingCry.soundId), pokemonEntity.getSoundCategory(), AnimonFixConfig.cryVoiceVolume(), 1.0F);
         }
     }
 

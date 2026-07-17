@@ -13,7 +13,8 @@ public final class AnimonFixConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("animon-soundfix.properties");
 
     private static boolean pokemonAmbientSounds = true;
-    private static boolean resourceCries = true;
+    private static int ambientVoiceVolume = 100;
+    private static int cryVoiceVolume = 100;
     private static boolean battleCries = false;
 
     private AnimonFixConfig() {
@@ -29,10 +30,8 @@ public final class AnimonFixConfig {
         }
 
         pokemonAmbientSounds = Boolean.parseBoolean(properties.getProperty("pokemonAmbientSounds", "true"));
-        resourceCries = Boolean.parseBoolean(properties.getProperty(
-                "resourceCries",
-                properties.getProperty("resourcePackCryFallbacks", "true")
-        ));
+        ambientVoiceVolume = parseVolume(properties.getProperty("ambientVoiceVolume"), 100);
+        cryVoiceVolume = parseVolume(properties.getProperty("cryVoiceVolume"), 100);
         battleCries = Boolean.parseBoolean(properties.getProperty("battleCries", "false"));
         save();
     }
@@ -40,7 +39,8 @@ public final class AnimonFixConfig {
     public static void save() {
         Properties properties = new Properties();
         properties.setProperty("pokemonAmbientSounds", Boolean.toString(pokemonAmbientSounds));
-        properties.setProperty("resourceCries", Boolean.toString(resourceCries));
+        properties.setProperty("ambientVoiceVolume", Integer.toString(ambientVoiceVolume));
+        properties.setProperty("cryVoiceVolume", Integer.toString(cryVoiceVolume));
         properties.setProperty("battleCries", Boolean.toString(battleCries));
 
         try {
@@ -61,12 +61,34 @@ public final class AnimonFixConfig {
         save();
     }
 
-    public static boolean resourceCries() {
-        return resourceCries;
+    public static float ambientVoiceVolume() {
+        return ambientVoiceVolume / 100.0F;
     }
 
-    public static void setResourceCries(boolean value) {
-        resourceCries = value;
+    public static int ambientVoiceVolumePercent() {
+        return ambientVoiceVolume;
+    }
+
+    public static void adjustAmbientVoiceVolume(int amount) {
+        ambientVoiceVolume = clampVolume(ambientVoiceVolume + amount);
+        if (ambientVoiceVolume == 0) {
+            pokemonAmbientSounds = false;
+        } else {
+            pokemonAmbientSounds = true;
+        }
+        save();
+    }
+
+    public static float cryVoiceVolume() {
+        return cryVoiceVolume / 100.0F;
+    }
+
+    public static int cryVoiceVolumePercent() {
+        return cryVoiceVolume;
+    }
+
+    public static void adjustCryVoiceVolume(int amount) {
+        cryVoiceVolume = clampVolume(cryVoiceVolume + amount);
         save();
     }
 
@@ -81,8 +103,21 @@ public final class AnimonFixConfig {
 
     public static void useDefaultCobblemonMode() {
         pokemonAmbientSounds = false;
-        resourceCries = false;
+        ambientVoiceVolume = 0;
+        cryVoiceVolume = 100;
         battleCries = false;
         save();
+    }
+
+    private static int parseVolume(String value, int fallback) {
+        try {
+            return clampVolume(Integer.parseInt(value));
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
+    }
+
+    private static int clampVolume(int value) {
+        return Math.max(0, Math.min(100, value));
     }
 }

@@ -23,23 +23,38 @@ public final class AnimonFixConfigScreen extends Screen {
             button.setMessage(ambientText());
         }).dimensions(x, y, 260, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(resourceCriesText(), button -> {
-            AnimonFixConfig.setResourceCries(!AnimonFixConfig.resourceCries());
-            button.setMessage(resourceCriesText());
-        }).dimensions(x, y + 24, 260, 20).build());
+        this.addDrawableChild(ButtonWidget.builder(ambientVolumeText(), button -> {
+            AnimonFixConfig.adjustAmbientVoiceVolume(-10);
+            button.setMessage(ambientVolumeText());
+        }).dimensions(x, y + 24, 128, 20).build());
+
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("+"), button -> {
+            AnimonFixConfig.adjustAmbientVoiceVolume(10);
+            this.clearAndInit();
+        }).dimensions(x + 132, y + 24, 128, 20).build());
+
+        this.addDrawableChild(ButtonWidget.builder(cryVolumeText(), button -> {
+            AnimonFixConfig.adjustCryVoiceVolume(-10);
+            button.setMessage(cryVolumeText());
+        }).dimensions(x, y + 48, 128, 20).build());
+
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("+"), button -> {
+            AnimonFixConfig.adjustCryVoiceVolume(10);
+            this.clearAndInit();
+        }).dimensions(x + 132, y + 48, 128, 20).build());
 
         this.addDrawableChild(ButtonWidget.builder(battleCriesText(), button -> {
             AnimonFixConfig.setBattleCries(!AnimonFixConfig.battleCries());
             button.setMessage(battleCriesText());
-        }).dimensions(x, y + 48, 260, 20).build());
+        }).dimensions(x, y + 72, 260, 20).build());
 
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Default Cobblemon Mode"), button -> {
             AnimonFixConfig.useDefaultCobblemonMode();
             this.clearAndInit();
-        }).dimensions(x, y + 80, 260, 20).build());
+        }).dimensions(x, y + 104, 260, 20).build());
 
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> this.close())
-                .dimensions(x, y + 112, 260, 20)
+                .dimensions(x, y + 136, 260, 20)
                 .build());
     }
 
@@ -68,8 +83,12 @@ public final class AnimonFixConfigScreen extends Screen {
         return Text.literal("Pokemon Ambient Sounds: " + onOff(AnimonFixConfig.pokemonAmbientSounds()));
     }
 
-    private static Text resourceCriesText() {
-        return Text.literal("Resource Cries: " + onOff(AnimonFixConfig.resourceCries()));
+    private static Text ambientVolumeText() {
+        return Text.literal("Ambient Volume: " + AnimonFixConfig.ambientVoiceVolumePercent() + "%");
+    }
+
+    private static Text cryVolumeText() {
+        return Text.literal("Cry Volume: " + AnimonFixConfig.cryVoiceVolumePercent() + "%");
     }
 
     private static Text battleCriesText() {

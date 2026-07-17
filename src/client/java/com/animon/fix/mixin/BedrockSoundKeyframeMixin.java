@@ -1,5 +1,6 @@
 package com.animon.fix.mixin;
 
+import com.animon.fix.AnimonFixConfig;
 import com.animon.fix.CryAnimationTracker;
 import com.cobblemon.mod.common.client.render.models.blockbench.PosableState;
 import com.cobblemon.mod.common.client.render.models.blockbench.bedrock.animation.BedrockSoundKeyframe;
@@ -10,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BedrockSoundKeyframe.class)
@@ -49,5 +51,24 @@ public abstract class BedrockSoundKeyframeMixin {
     private static boolean isPokemonCry(Identifier id) {
         String path = id.getPath();
         return path.endsWith(".cry") || path.endsWith("_cry");
+    }
+
+    @ModifyArg(
+            method = "run(Lnet/minecraft/entity/Entity;Lcom/cobblemon/mod/common/client/render/models/blockbench/PosableState;)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/World;playSoundFromEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V"
+            ),
+            index = 3
+    )
+    private float animonFix$applyConfiguredAnimationSoundVolume(float volume) {
+        Identifier sound = this.getSound();
+        if (isPokemonCry(sound)) {
+            return volume * AnimonFixConfig.cryVoiceVolume();
+        }
+        if (isPokemonSound(sound)) {
+            return volume * AnimonFixConfig.ambientVoiceVolume();
+        }
+        return volume;
     }
 }

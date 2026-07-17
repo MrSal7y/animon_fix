@@ -23,23 +23,38 @@ public final class AnimonFixConfigScreen extends Screen {
             button.setMessage(ambientText());
         }).bounds(x, y, 260, 20).build());
 
-        this.addRenderableWidget(Button.builder(resourceCriesText(), button -> {
-            AnimonFixConfig.setResourceCries(!AnimonFixConfig.resourceCries());
-            button.setMessage(resourceCriesText());
-        }).bounds(x, y + 24, 260, 20).build());
+        this.addRenderableWidget(Button.builder(ambientVolumeText(), button -> {
+            AnimonFixConfig.adjustAmbientVoiceVolume(-10);
+            button.setMessage(ambientVolumeText());
+        }).bounds(x, y + 24, 128, 20).build());
+
+        this.addRenderableWidget(Button.builder(Component.literal("+"), button -> {
+            AnimonFixConfig.adjustAmbientVoiceVolume(10);
+            this.rebuildWidgets();
+        }).bounds(x + 132, y + 24, 128, 20).build());
+
+        this.addRenderableWidget(Button.builder(cryVolumeText(), button -> {
+            AnimonFixConfig.adjustCryVoiceVolume(-10);
+            button.setMessage(cryVolumeText());
+        }).bounds(x, y + 48, 128, 20).build());
+
+        this.addRenderableWidget(Button.builder(Component.literal("+"), button -> {
+            AnimonFixConfig.adjustCryVoiceVolume(10);
+            this.rebuildWidgets();
+        }).bounds(x + 132, y + 48, 128, 20).build());
 
         this.addRenderableWidget(Button.builder(battleCriesText(), button -> {
             AnimonFixConfig.setBattleCries(!AnimonFixConfig.battleCries());
             button.setMessage(battleCriesText());
-        }).bounds(x, y + 48, 260, 20).build());
+        }).bounds(x, y + 72, 260, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("Default Cobblemon Mode"), button -> {
             AnimonFixConfig.useDefaultCobblemonMode();
             this.rebuildWidgets();
-        }).bounds(x, y + 80, 260, 20).build());
+        }).bounds(x, y + 104, 260, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("Done"), button -> this.onClose())
-                .bounds(x, y + 112, 260, 20)
+                .bounds(x, y + 136, 260, 20)
                 .build());
     }
 
@@ -68,8 +83,12 @@ public final class AnimonFixConfigScreen extends Screen {
         return Component.literal("Pokemon Ambient Sounds: " + onOff(AnimonFixConfig.pokemonAmbientSounds()));
     }
 
-    private static Component resourceCriesText() {
-        return Component.literal("Resource Cries: " + onOff(AnimonFixConfig.resourceCries()));
+    private static Component ambientVolumeText() {
+        return Component.literal("Ambient Volume: " + AnimonFixConfig.ambientVoiceVolumePercent() + "%");
+    }
+
+    private static Component cryVolumeText() {
+        return Component.literal("Cry Volume: " + AnimonFixConfig.cryVoiceVolumePercent() + "%");
     }
 
     private static Component battleCriesText() {

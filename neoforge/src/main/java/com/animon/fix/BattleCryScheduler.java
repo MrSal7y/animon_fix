@@ -85,7 +85,7 @@ public final class BattleCryScheduler {
                 pokemonEntity.getZ(),
                 SoundEvent.createVariableRangeEvent(sound),
                 pokemonEntity.getSoundSource(),
-                1.0F,
+                AnimonFixConfig.cryVoiceVolume(),
                 1.0F,
                 false
         );
