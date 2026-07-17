@@ -101,6 +101,14 @@ public final class AnimonFixConfig {
         save();
     }
 
+    public static void useRegularDefaults() {
+        pokemonAmbientSounds = true;
+        ambientVoiceVolume = 100;
+        cryVoiceVolume = 100;
+        battleCries = false;
+        save();
+    }
+
     public static void useDefaultCobblemonMode() {
         pokemonAmbientSounds = false;
         ambientVoiceVolume = 0;

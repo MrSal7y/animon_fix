@@ -16,7 +16,7 @@ public final class AnimonFixConfigScreen extends Screen {
     @Override
     protected void init() {
         int x = this.width / 2 - 130;
-        int y = this.height / 2 - 48;
+        int y = this.height / 2 - 60;
 
         this.addDrawableChild(ButtonWidget.builder(ambientText(), button -> {
             AnimonFixConfig.setPokemonAmbientSounds(!AnimonFixConfig.pokemonAmbientSounds());
@@ -54,27 +54,25 @@ public final class AnimonFixConfigScreen extends Screen {
             button.setMessage(battleCriesText());
         }).dimensions(x, y + 72, 260, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Default Cobblemon Mode"), button -> {
-            AnimonFixConfig.useDefaultCobblemonMode();
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Reset Defaults"), button -> {
+            AnimonFixConfig.useRegularDefaults();
             this.clearAndInit();
         }).dimensions(x, y + 104, 260, 20).build());
 
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Default Cobblemon Mode"), button -> {
+            AnimonFixConfig.useDefaultCobblemonMode();
+            this.clearAndInit();
+        }).dimensions(x, y + 128, 260, 20).build());
+
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> this.close())
-                .dimensions(x, y + 136, 260, 20)
+                .dimensions(x, y + 160, 260, 20)
                 .build());
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 28, 0xFFFFFF);
-        context.drawCenteredTextWithShadow(
-                this.textRenderer,
-                Text.literal("Battle cries use sound events like cobblemon:pokemon.bulbasaur.battle."),
-                this.width / 2,
-                48,
-                0xA0A0A0
-        );
+        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 24, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }
 

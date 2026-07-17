@@ -16,7 +16,7 @@ public final class AnimonFixConfigScreen extends Screen {
     @Override
     protected void init() {
         int x = this.width / 2 - 130;
-        int y = this.height / 2 - 48;
+        int y = this.height / 2 - 60;
 
         this.addRenderableWidget(Button.builder(ambientText(), button -> {
             AnimonFixConfig.setPokemonAmbientSounds(!AnimonFixConfig.pokemonAmbientSounds());
@@ -54,27 +54,25 @@ public final class AnimonFixConfigScreen extends Screen {
             button.setMessage(battleCriesText());
         }).bounds(x, y + 72, 260, 20).build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("Default Cobblemon Mode"), button -> {
-            AnimonFixConfig.useDefaultCobblemonMode();
+        this.addRenderableWidget(Button.builder(Component.literal("Reset Defaults"), button -> {
+            AnimonFixConfig.useRegularDefaults();
             this.rebuildWidgets();
         }).bounds(x, y + 104, 260, 20).build());
 
+        this.addRenderableWidget(Button.builder(Component.literal("Default Cobblemon Mode"), button -> {
+            AnimonFixConfig.useDefaultCobblemonMode();
+            this.rebuildWidgets();
+        }).bounds(x, y + 128, 260, 20).build());
+
         this.addRenderableWidget(Button.builder(Component.literal("Done"), button -> this.onClose())
-                .bounds(x, y + 136, 260, 20)
+                .bounds(x, y + 160, 260, 20)
                 .build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 28, 0xFFFFFF);
-        graphics.drawCenteredString(
-                this.font,
-                Component.literal("Battle cries use sound events like cobblemon:pokemon.bulbasaur.battle."),
-                this.width / 2,
-                48,
-                0xA0A0A0
-        );
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 24, 0xFFFFFF);
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
