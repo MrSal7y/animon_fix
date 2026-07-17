@@ -107,8 +107,8 @@ public final class ClientPokemonSoundFilter {
                 sound.getZ(),
                 SoundEvent.createVariableRangeEvent(originalCry),
                 sound.getSource(),
-                sound.getVolume(),
-                sound.getPitch(),
+                1.0F,
+                1.0F,
                 false
         );
         return true;
