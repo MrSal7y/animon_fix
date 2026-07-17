@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.Entity;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
@@ -26,6 +27,9 @@ public final class ClientPokemonSoundFilter {
 
         if (isPokemonCry(id)) {
             markCry(id);
+            if (!AnimonFixConfig.resourceCries()) {
+                return playOriginalCobblemonCry(sound);
+            }
             return BattleCryScheduler.shouldCancelNormalCry(sound);
         }
 
@@ -84,6 +88,30 @@ public final class ClientPokemonSoundFilter {
         }
 
         return false;
+    }
+
+    private static boolean playOriginalCobblemonCry(SoundInstance sound) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world == null) {
+            return false;
+        }
+
+        Identifier originalCry = Identifier.of("animon_fix", "original." + sound.getId().getPath());
+        if (!client.getSoundManager().getKeys().contains(originalCry)) {
+            return false;
+        }
+
+        client.world.playSound(
+                sound.getX(),
+                sound.getY(),
+                sound.getZ(),
+                SoundEvent.of(originalCry),
+                sound.getCategory(),
+                sound.getVolume(),
+                sound.getPitch(),
+                false
+        );
+        return true;
     }
 
     private static void prune(long now) {

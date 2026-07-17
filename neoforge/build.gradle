@@ -2,6 +2,9 @@ plugins {
     id "net.neoforged.moddev" version "1.0.11"
 }
 
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 version = rootProject.mod_version
 group = rootProject.maven_group
 
@@ -31,7 +34,35 @@ dependencies {
     compileOnly files(rootProject.cobblemon_neoforge_jar)
 }
 
+def generatedSoundResources = layout.buildDirectory.dir("generated/animonFixSounds")
+
+tasks.register("generateOriginalCrySounds") {
+    inputs.file(rootProject.cobblemon_neoforge_jar)
+    outputs.dir(generatedSoundResources)
+
+    doLast {
+        def soundJsonFile = zipTree(rootProject.cobblemon_neoforge_jar).matching {
+            include "assets/cobblemon/sounds.json"
+        }.singleFile
+        def cobblemonSounds = new JsonSlurper().parse(soundJsonFile)
+        def originalCrySounds = [:]
+
+        cobblemonSounds.each { key, value ->
+            if (key.startsWith("pokemon.") && (key.endsWith(".cry") || key.endsWith("_cry"))) {
+                originalCrySounds["original.${key}"] = value
+            }
+        }
+
+        def outputFile = generatedSoundResources.get().file("assets/animon_fix/sounds.json").asFile
+        outputFile.parentFile.mkdirs()
+        outputFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(originalCrySounds))
+    }
+}
+
+sourceSets.main.resources.srcDir(generatedSoundResources)
+
 processResources {
+    dependsOn tasks.named("generateOriginalCrySounds")
     inputs.property "version", project.version
 
     filesMatching("META-INF/neoforge.mods.toml") {
