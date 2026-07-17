@@ -16,7 +16,7 @@ This mod is intended to be used alongside the Animon resource pack. It can also 
 
 ## In-Game Settings
 
-The config screen lets you turn off Pokemon ambient sounds, resource cries, and battle cries. Resource cries disables `pokemon.<species>.cry` playback from the mod's sound filter. Battle cries are off by default and can be enabled if your resource pack provides battle sound events.
+The config screen lets you turn off Pokemon ambient sounds, resource cries, and battle cries. Resource cries controls this mod's extra resource-pack cry fallback behavior; normal Cobblemon cry events are still allowed through. Battle cries are off by default and can be enabled if your resource pack provides battle sound events.
 
 For battle cries, add a sound event like `pokemon.bulbasaur.battle` in your resource pack `sounds.json` and point it at an OGG such as `sounds/pokemon/bulbasaur/bulbasaur_battle.ogg`.
 

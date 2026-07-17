@@ -18,6 +18,7 @@ public final class BattleCryScheduler {
     private static final long NORMAL_CRY_SUPPRESSION_MS = 1500L;
     private static final Map<UUID, Boolean> BATTLE_STATES = new HashMap<>();
     private static final Map<String, Long> RECENT_BATTLE_CRIES = new HashMap<>();
+    private static final Set<String> ALLOW_NEXT_NORMAL_CRY = new HashSet<>();
 
     private BattleCryScheduler() {
     }
@@ -64,18 +65,31 @@ public final class BattleCryScheduler {
         }
 
         Long expiresAt = RECENT_BATTLE_CRIES.get(basePokemonSoundPath(id));
+        if (expiresAt != null && expiresAt >= System.currentTimeMillis() && ALLOW_NEXT_NORMAL_CRY.remove(basePokemonSoundPath(id))) {
+            return false;
+        }
         return expiresAt != null && expiresAt >= System.currentTimeMillis();
     }
 
     private static void playBattleCry(MinecraftClient client, PokemonEntity pokemonEntity) {
         Identifier battleSound = getBattleSoundId(pokemonEntity);
-        RECENT_BATTLE_CRIES.put(basePokemonSoundPath(battleSound), System.currentTimeMillis() + NORMAL_CRY_SUPPRESSION_MS);
-        client.world.playSoundFromEntity(pokemonEntity, SoundEvent.of(battleSound), pokemonEntity.getSoundCategory(), 1.0F, 1.0F);
+        Identifier sound = client.getSoundManager().getKeys().contains(battleSound) ? battleSound : getCrySoundId(pokemonEntity);
+        String basePath = basePokemonSoundPath(sound);
+        RECENT_BATTLE_CRIES.put(basePath, System.currentTimeMillis() + NORMAL_CRY_SUPPRESSION_MS);
+        if (sound.equals(getCrySoundId(pokemonEntity))) {
+            ALLOW_NEXT_NORMAL_CRY.add(basePath);
+        }
+        client.world.playSoundFromEntity(pokemonEntity, SoundEvent.of(sound), pokemonEntity.getSoundCategory(), 1.0F, 1.0F);
     }
 
     private static Identifier getBattleSoundId(PokemonEntity pokemonEntity) {
         String species = pokemonEntity.getPokemon().getSpecies().getResourceIdentifier().getPath();
         return Identifier.of("cobblemon", "pokemon." + species + ".battle");
+    }
+
+    private static Identifier getCrySoundId(PokemonEntity pokemonEntity) {
+        String species = pokemonEntity.getPokemon().getSpecies().getResourceIdentifier().getPath();
+        return Identifier.of("cobblemon", "pokemon." + species + ".cry");
     }
 
     private static void prune(long now) {
