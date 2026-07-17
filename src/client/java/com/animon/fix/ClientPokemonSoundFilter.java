@@ -33,6 +33,10 @@ public final class ClientPokemonSoundFilter {
             return false;
         }
 
+        if (!AnimonFixConfig.pokemonAmbientSounds()) {
+            return true;
+        }
+
         return isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound);
     }
 

@@ -4,5 +4,5 @@ build/
 tools/
 decompiled/
 cobblemon_classes/
-assets/
+/assets/
 libs/

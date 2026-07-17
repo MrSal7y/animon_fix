@@ -10,7 +10,12 @@ This mod is intended to be used alongside the Animon resource pack. It can also 
 - Keeps normal wild Pokemon ambient sounds working.
 - Leaves Cobblemon cry sounds alone so cry audio can stay synced with cry animations.
 - Adds a fallback cry trigger for Pokemon where Cobblemon has a cry animation but no sound keyframe, allowing resource-pack cries such as `cobblemon:pokemon.<species>.cry` to play.
+- Adds an in-game config screen, opened with the configurable Controls keybind. The default key is apostrophe (`'`).
 - Runs client-side only, so it can be used when joining servers that do not have this addon installed.
+
+## In-Game Settings
+
+The config screen lets you turn off Pokemon ambient sounds, disable resource-pack cry fallbacks, or use a simple Default Cobblemon Mode preset that turns both of those extras off.
 
 ## Installation
 

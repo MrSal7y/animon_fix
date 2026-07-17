@@ -19,6 +19,10 @@ public final class FallbackCryScheduler {
     }
 
     public static void schedule(Entity entity) {
+        if (!AnimonFixConfig.resourcePackCryFallbacks()) {
+            return;
+        }
+
         if (!(entity instanceof PokemonEntity pokemonEntity)) {
             return;
         }
@@ -28,6 +32,11 @@ public final class FallbackCryScheduler {
     }
 
     public static void tick(MinecraftClient client) {
+        if (!AnimonFixConfig.resourcePackCryFallbacks()) {
+            PENDING_CRIES.clear();
+            return;
+        }
+
         if (client.world == null || PENDING_CRIES.isEmpty()) {
             PENDING_CRIES.clear();
             return;

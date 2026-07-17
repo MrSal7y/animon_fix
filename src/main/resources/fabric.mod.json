@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "animon_fix",
   "version": "${version}",
-  "name": "Animon Ambient Cry Fix",
+  "name": "Animon SoundFix",
   "description": "Client-side Cobblemon sound fix for resource packs that provide separate Pokemon ambient and cry sounds.",
   "authors": [
     "MrSal7y"
@@ -13,6 +13,11 @@
     "fabricloader": ">=0.16.0",
     "minecraft": "~1.21.1",
     "cobblemon": ">=1.7.3"
+  },
+  "entrypoints": {
+    "client": [
+      "com.animon.fix.AnimonFixClient"
+    ]
   },
   "mixins": [
     {
