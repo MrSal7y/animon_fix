@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
@@ -35,6 +36,10 @@ public final class ClientPokemonSoundFilter {
 
         if (!AnimonFixConfig.pokemonAmbientSounds()) {
             return true;
+        }
+
+        if (!hasSoundEvent(id)) {
+            return playCryForMissingAmbient(sound);
         }
 
         return isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound);
@@ -86,6 +91,34 @@ public final class ClientPokemonSoundFilter {
         return false;
     }
 
+    private static boolean playCryForMissingAmbient(SoundInstance sound) {
+        ResourceLocation cryId = toCrySoundId(sound.getLocation());
+        if (!hasSoundEvent(cryId)) {
+            return true;
+        }
+
+        Minecraft client = Minecraft.getInstance();
+        if (client.level == null) {
+            return true;
+        }
+
+        client.level.playLocalSound(
+                sound.getX(),
+                sound.getY(),
+                sound.getZ(),
+                SoundEvent.createVariableRangeEvent(cryId),
+                sound.getSource(),
+                AnimonFixConfig.cryVoiceVolume(),
+                1.0F,
+                false
+        );
+        return true;
+    }
+
+    private static boolean hasSoundEvent(ResourceLocation id) {
+        return Minecraft.getInstance().getSoundManager().getAvailableSounds().contains(id);
+    }
+
     private static void prune(long now) {
         Iterator<Map.Entry<String, Long>> iterator = RECENT_CRIES.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -121,5 +154,16 @@ public final class ClientPokemonSoundFilter {
             return path.substring(0, path.length() - "_cry".length());
         }
         return path;
+    }
+
+    private static ResourceLocation toCrySoundId(ResourceLocation id) {
+        String path = id.getPath();
+        if (path.endsWith(".ambient")) {
+            return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), path.substring(0, path.length() - ".ambient".length()) + ".cry");
+        }
+        if (path.endsWith("_ambient")) {
+            return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), path.substring(0, path.length() - "_ambient".length()) + "_cry");
+        }
+        return id;
     }
 }

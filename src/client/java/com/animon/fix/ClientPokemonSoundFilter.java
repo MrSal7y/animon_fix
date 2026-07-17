@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.Entity;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
@@ -35,6 +36,10 @@ public final class ClientPokemonSoundFilter {
 
         if (!AnimonFixConfig.pokemonAmbientSounds()) {
             return true;
+        }
+
+        if (!hasSoundEvent(id)) {
+            return playCryForMissingAmbient(sound);
         }
 
         return isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound);
@@ -86,6 +91,34 @@ public final class ClientPokemonSoundFilter {
         return false;
     }
 
+    private static boolean playCryForMissingAmbient(SoundInstance sound) {
+        Identifier cryId = toCrySoundId(sound.getId());
+        if (!hasSoundEvent(cryId)) {
+            return true;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world == null) {
+            return true;
+        }
+
+        client.world.playSound(
+                sound.getX(),
+                sound.getY(),
+                sound.getZ(),
+                SoundEvent.of(cryId),
+                sound.getCategory(),
+                AnimonFixConfig.cryVoiceVolume(),
+                1.0F,
+                false
+        );
+        return true;
+    }
+
+    private static boolean hasSoundEvent(Identifier id) {
+        return MinecraftClient.getInstance().getSoundManager().getKeys().contains(id);
+    }
+
     private static void prune(long now) {
         Iterator<Map.Entry<String, Long>> iterator = RECENT_CRIES.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -121,5 +154,16 @@ public final class ClientPokemonSoundFilter {
             return path.substring(0, path.length() - "_cry".length());
         }
         return path;
+    }
+
+    private static Identifier toCrySoundId(Identifier id) {
+        String path = id.getPath();
+        if (path.endsWith(".ambient")) {
+            return Identifier.of(id.getNamespace(), path.substring(0, path.length() - ".ambient".length()) + ".cry");
+        }
+        if (path.endsWith("_ambient")) {
+            return Identifier.of(id.getNamespace(), path.substring(0, path.length() - "_ambient".length()) + "_cry");
+        }
+        return id;
     }
 }

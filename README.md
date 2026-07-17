@@ -8,6 +8,7 @@ This mod is intended to be used alongside the Animon resource pack. It can also 
 
 - Stops owned or battling Pokemon from playing their ambient sound on top of their cry sound when they are sent out or enter a cry animation.
 - Keeps normal wild Pokemon ambient sounds working.
+- Falls back to normal Pokemon cries in the wild when no ambient sound event exists.
 - Leaves Cobblemon cry sounds alone so cry audio can stay synced with cry animations.
 - Adds a fallback cry trigger for Pokemon where Cobblemon has a cry animation but no sound keyframe, allowing resource-pack cries such as `cobblemon:pokemon.<species>.cry` to play.
 - Adds optional battle cries using sound events such as `cobblemon:pokemon.<species>.battle`.
