@@ -3,12 +3,18 @@ package com.animon.fix;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.resources.sounds.Sound;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public final class ClientPokemonSoundFilter {
@@ -38,11 +44,11 @@ public final class ClientPokemonSoundFilter {
             return true;
         }
 
-        if (!hasSoundEvent(id)) {
-            return playCryForMissingAmbient(sound);
+        if (isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound)) {
+            return true;
         }
 
-        return isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound);
+        return usesOnlyCobblemonSoundResource(id) && playCryForBuiltInAmbient(sound);
     }
 
     public static boolean hasRecentCry(ResourceLocation id) {
@@ -91,10 +97,10 @@ public final class ClientPokemonSoundFilter {
         return false;
     }
 
-    private static boolean playCryForMissingAmbient(SoundInstance sound) {
+    private static boolean playCryForBuiltInAmbient(SoundInstance sound) {
         ResourceLocation cryId = toCrySoundId(sound.getLocation());
         if (!hasSoundEvent(cryId)) {
-            return true;
+            return false;
         }
 
         Minecraft client = Minecraft.getInstance();
@@ -113,6 +119,28 @@ public final class ClientPokemonSoundFilter {
                 false
         );
         return true;
+    }
+
+    private static boolean usesOnlyCobblemonSoundResource(ResourceLocation id) {
+        Minecraft client = Minecraft.getInstance();
+        WeighedSoundEvents soundEvent = client.getSoundManager().getSoundEvent(id);
+        if (soundEvent == null) {
+            return false;
+        }
+
+        Sound selectedSound = soundEvent.getSound(SoundInstance.createUnseededRandom());
+        if (selectedSound == SoundManager.EMPTY_SOUND || selectedSound == SoundManager.INTENTIONALLY_EMPTY_SOUND) {
+            return false;
+        }
+
+        ResourceLocation soundFile = selectedSound.getLocation();
+        ResourceLocation resourceId = ResourceLocation.fromNamespaceAndPath(soundFile.getNamespace(), "sounds/" + soundFile.getPath() + ".ogg");
+        List<Resource> resources = client.getResourceManager().getResourceStack(resourceId);
+        return !resources.isEmpty() && resources.stream().allMatch(resource -> isCobblemonPack(resource.sourcePackId()));
+    }
+
+    private static boolean isCobblemonPack(String packId) {
+        return packId.toLowerCase(Locale.ROOT).contains("cobblemon");
     }
 
     private static boolean hasSoundEvent(ResourceLocation id) {

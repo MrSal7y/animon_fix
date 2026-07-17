@@ -2,13 +2,19 @@ package com.animon.fix;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.sound.Sound;
 import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.client.sound.SoundManager;
+import net.minecraft.client.sound.WeightedSoundSet;
 import net.minecraft.entity.Entity;
+import net.minecraft.resource.Resource;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public final class ClientPokemonSoundFilter {
@@ -38,11 +44,11 @@ public final class ClientPokemonSoundFilter {
             return true;
         }
 
-        if (!hasSoundEvent(id)) {
-            return playCryForMissingAmbient(sound);
+        if (isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound)) {
+            return true;
         }
 
-        return isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound);
+        return usesOnlyCobblemonSoundResource(id) && playCryForBuiltInAmbient(sound);
     }
 
     public static boolean hasRecentCry(Identifier id) {
@@ -91,10 +97,10 @@ public final class ClientPokemonSoundFilter {
         return false;
     }
 
-    private static boolean playCryForMissingAmbient(SoundInstance sound) {
+    private static boolean playCryForBuiltInAmbient(SoundInstance sound) {
         Identifier cryId = toCrySoundId(sound.getId());
         if (!hasSoundEvent(cryId)) {
-            return true;
+            return false;
         }
 
         MinecraftClient client = MinecraftClient.getInstance();
@@ -113,6 +119,28 @@ public final class ClientPokemonSoundFilter {
                 false
         );
         return true;
+    }
+
+    private static boolean usesOnlyCobblemonSoundResource(Identifier id) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        WeightedSoundSet soundSet = client.getSoundManager().get(id);
+        if (soundSet == null) {
+            return false;
+        }
+
+        Sound selectedSound = soundSet.getSound(SoundInstance.createRandom());
+        if (selectedSound == SoundManager.MISSING_SOUND || selectedSound == SoundManager.INTENTIONALLY_EMPTY_SOUND) {
+            return false;
+        }
+
+        Identifier soundFile = selectedSound.getIdentifier();
+        Identifier resourceId = Identifier.of(soundFile.getNamespace(), "sounds/" + soundFile.getPath() + ".ogg");
+        List<Resource> resources = client.getResourceManager().getAllResources(resourceId);
+        return !resources.isEmpty() && resources.stream().allMatch(resource -> isCobblemonPack(resource.getPackId()));
+    }
+
+    private static boolean isCobblemonPack(String packId) {
+        return packId.toLowerCase(Locale.ROOT).contains("cobblemon");
     }
 
     private static boolean hasSoundEvent(Identifier id) {
