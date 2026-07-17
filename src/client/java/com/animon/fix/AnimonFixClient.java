@@ -16,7 +16,7 @@ public final class AnimonFixClient implements ClientModInitializer {
         configKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.animon_fix.open_config",
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_APOSTROPHE,
+                GLFW.GLFW_KEY_WORLD_2,
                 "category.animon_fix"
         ));
 

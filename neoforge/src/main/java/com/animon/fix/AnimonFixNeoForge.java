@@ -15,7 +15,7 @@ public final class AnimonFixNeoForge {
     private static final KeyMapping CONFIG_KEY = new KeyMapping(
             "key.animon_fix.open_config",
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_APOSTROPHE,
+            GLFW.GLFW_KEY_WORLD_2,
             "category.animon_fix"
     );
 

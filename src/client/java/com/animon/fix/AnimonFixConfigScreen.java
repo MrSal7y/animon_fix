@@ -44,7 +44,7 @@ public final class AnimonFixConfigScreen extends Screen {
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 28, 0xFFFFFF);
         context.drawCenteredTextWithShadow(
                 this.textRenderer,
-                Text.literal("Resource packs still control built-in Cobblemon cry replacements."),
+                Text.literal("Missing cry fallbacks only affect Pokemon without Cobblemon sound keyframes."),
                 this.width / 2,
                 48,
                 0xA0A0A0
@@ -64,7 +64,7 @@ public final class AnimonFixConfigScreen extends Screen {
     }
 
     private static Text fallbackText() {
-        return Text.literal("Resource-Pack Cry Fallbacks: " + onOff(AnimonFixConfig.resourcePackCryFallbacks()));
+        return Text.literal("Missing Cry Fallbacks: " + onOff(AnimonFixConfig.resourcePackCryFallbacks()));
     }
 
     private static String onOff(boolean value) {
