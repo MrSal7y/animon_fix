@@ -23,25 +23,31 @@ public final class AnimonFixConfigScreen extends Screen {
             button.setMessage(ambientText());
         }).bounds(x, y, 260, 20).build());
 
+        this.addRenderableWidget(Button.builder(Component.literal("-"), button -> {
+            AnimonFixConfig.adjustAmbientVoiceVolume(step(-1));
+            this.rebuildWidgets();
+        }).bounds(x, y + 24, 32, 20).build());
+
         this.addRenderableWidget(Button.builder(ambientVolumeText(), button -> {
-            AnimonFixConfig.adjustAmbientVoiceVolume(-10);
-            button.setMessage(ambientVolumeText());
-        }).bounds(x, y + 24, 128, 20).build());
+        }).bounds(x + 36, y + 24, 188, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("+"), button -> {
-            AnimonFixConfig.adjustAmbientVoiceVolume(10);
+            AnimonFixConfig.adjustAmbientVoiceVolume(step(1));
             this.rebuildWidgets();
-        }).bounds(x + 132, y + 24, 128, 20).build());
+        }).bounds(x + 228, y + 24, 32, 20).build());
+
+        this.addRenderableWidget(Button.builder(Component.literal("-"), button -> {
+            AnimonFixConfig.adjustCryVoiceVolume(step(-1));
+            this.rebuildWidgets();
+        }).bounds(x, y + 48, 32, 20).build());
 
         this.addRenderableWidget(Button.builder(cryVolumeText(), button -> {
-            AnimonFixConfig.adjustCryVoiceVolume(-10);
-            button.setMessage(cryVolumeText());
-        }).bounds(x, y + 48, 128, 20).build());
+        }).bounds(x + 36, y + 48, 188, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("+"), button -> {
-            AnimonFixConfig.adjustCryVoiceVolume(10);
+            AnimonFixConfig.adjustCryVoiceVolume(step(1));
             this.rebuildWidgets();
-        }).bounds(x + 132, y + 48, 128, 20).build());
+        }).bounds(x + 228, y + 48, 32, 20).build());
 
         this.addRenderableWidget(Button.builder(battleCriesText(), button -> {
             AnimonFixConfig.setBattleCries(!AnimonFixConfig.battleCries());
@@ -97,5 +103,9 @@ public final class AnimonFixConfigScreen extends Screen {
 
     private static String onOff(boolean value) {
         return value ? "On" : "Off";
+    }
+
+    private static int step(int direction) {
+        return direction * (Screen.hasShiftDown() ? 10 : 1);
     }
 }

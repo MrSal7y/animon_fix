@@ -16,7 +16,7 @@ This mod is intended to be used alongside the Animon resource pack. It can also 
 
 ## In-Game Settings
 
-The config screen lets you turn Pokemon ambient sounds on or off, adjust ambient and cry volume, and enable battle cries. Battle cries are off by default and can be enabled if your resource pack provides battle sound events.
+The config screen lets you turn Pokemon ambient sounds on or off, adjust ambient and cry volume with `-` and `+` buttons, and enable battle cries. Volume buttons move by 1%, or 10% while holding Shift. Battle cries are off by default and can be enabled if your resource pack provides battle sound events.
 
 For battle cries, add a sound event like `pokemon.bulbasaur.battle` in your resource pack `sounds.json` and point it at an OGG such as `sounds/pokemon/bulbasaur/bulbasaur_battle.ogg`.
 
