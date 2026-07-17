@@ -13,7 +13,8 @@ public final class AnimonFixConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("animon-soundfix.properties");
 
     private static boolean pokemonAmbientSounds = true;
-    private static boolean resourcePackCryFallbacks = true;
+    private static boolean resourceCries = true;
+    private static boolean battleCries = false;
 
     private AnimonFixConfig() {
     }
@@ -28,14 +29,19 @@ public final class AnimonFixConfig {
         }
 
         pokemonAmbientSounds = Boolean.parseBoolean(properties.getProperty("pokemonAmbientSounds", "true"));
-        resourcePackCryFallbacks = Boolean.parseBoolean(properties.getProperty("resourcePackCryFallbacks", "true"));
+        resourceCries = Boolean.parseBoolean(properties.getProperty(
+                "resourceCries",
+                properties.getProperty("resourcePackCryFallbacks", "true")
+        ));
+        battleCries = Boolean.parseBoolean(properties.getProperty("battleCries", "false"));
         save();
     }
 
     public static void save() {
         Properties properties = new Properties();
         properties.setProperty("pokemonAmbientSounds", Boolean.toString(pokemonAmbientSounds));
-        properties.setProperty("resourcePackCryFallbacks", Boolean.toString(resourcePackCryFallbacks));
+        properties.setProperty("resourceCries", Boolean.toString(resourceCries));
+        properties.setProperty("battleCries", Boolean.toString(battleCries));
 
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
@@ -55,18 +61,28 @@ public final class AnimonFixConfig {
         save();
     }
 
-    public static boolean resourcePackCryFallbacks() {
-        return resourcePackCryFallbacks;
+    public static boolean resourceCries() {
+        return resourceCries;
     }
 
-    public static void setResourcePackCryFallbacks(boolean value) {
-        resourcePackCryFallbacks = value;
+    public static void setResourceCries(boolean value) {
+        resourceCries = value;
+        save();
+    }
+
+    public static boolean battleCries() {
+        return battleCries;
+    }
+
+    public static void setBattleCries(boolean value) {
+        battleCries = value;
         save();
     }
 
     public static void useDefaultCobblemonMode() {
         pokemonAmbientSounds = false;
-        resourcePackCryFallbacks = false;
+        resourceCries = false;
+        battleCries = false;
         save();
     }
 }

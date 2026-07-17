@@ -23,18 +23,23 @@ public final class AnimonFixConfigScreen extends Screen {
             button.setMessage(ambientText());
         }).dimensions(x, y, 260, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(fallbackText(), button -> {
-            AnimonFixConfig.setResourcePackCryFallbacks(!AnimonFixConfig.resourcePackCryFallbacks());
-            button.setMessage(fallbackText());
+        this.addDrawableChild(ButtonWidget.builder(resourceCriesText(), button -> {
+            AnimonFixConfig.setResourceCries(!AnimonFixConfig.resourceCries());
+            button.setMessage(resourceCriesText());
         }).dimensions(x, y + 24, 260, 20).build());
+
+        this.addDrawableChild(ButtonWidget.builder(battleCriesText(), button -> {
+            AnimonFixConfig.setBattleCries(!AnimonFixConfig.battleCries());
+            button.setMessage(battleCriesText());
+        }).dimensions(x, y + 48, 260, 20).build());
 
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Default Cobblemon Mode"), button -> {
             AnimonFixConfig.useDefaultCobblemonMode();
             this.clearAndInit();
-        }).dimensions(x, y + 56, 260, 20).build());
+        }).dimensions(x, y + 80, 260, 20).build());
 
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> this.close())
-                .dimensions(x, y + 88, 260, 20)
+                .dimensions(x, y + 112, 260, 20)
                 .build());
     }
 
@@ -44,7 +49,7 @@ public final class AnimonFixConfigScreen extends Screen {
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 28, 0xFFFFFF);
         context.drawCenteredTextWithShadow(
                 this.textRenderer,
-                Text.literal("Missing cry fallbacks only affect Pokemon without Cobblemon sound keyframes."),
+                Text.literal("Battle cries use sound events like cobblemon:pokemon.bulbasaur.battle."),
                 this.width / 2,
                 48,
                 0xA0A0A0
@@ -63,8 +68,12 @@ public final class AnimonFixConfigScreen extends Screen {
         return Text.literal("Pokemon Ambient Sounds: " + onOff(AnimonFixConfig.pokemonAmbientSounds()));
     }
 
-    private static Text fallbackText() {
-        return Text.literal("Missing Cry Fallbacks: " + onOff(AnimonFixConfig.resourcePackCryFallbacks()));
+    private static Text resourceCriesText() {
+        return Text.literal("Resource Cries: " + onOff(AnimonFixConfig.resourceCries()));
+    }
+
+    private static Text battleCriesText() {
+        return Text.literal("Battle Cries: " + onOff(AnimonFixConfig.battleCries()));
     }
 
     private static String onOff(boolean value) {

@@ -1,5 +1,6 @@
 package com.animon.fix.mixin;
 
+import com.animon.fix.BattleCryScheduler;
 import com.animon.fix.FallbackCryScheduler;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftClientTickMixin {
     @Inject(method = "tick()V", at = @At("TAIL"))
     private void animonFix$tickFallbackCryScheduler(CallbackInfo ci) {
+        BattleCryScheduler.tick((MinecraftClient) (Object) this);
         FallbackCryScheduler.tick((MinecraftClient) (Object) this);
     }
 }

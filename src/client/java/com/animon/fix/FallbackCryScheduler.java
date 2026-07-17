@@ -19,7 +19,7 @@ public final class FallbackCryScheduler {
     }
 
     public static void schedule(Entity entity) {
-        if (!AnimonFixConfig.resourcePackCryFallbacks()) {
+        if (!AnimonFixConfig.resourceCries()) {
             return;
         }
 
@@ -32,7 +32,7 @@ public final class FallbackCryScheduler {
     }
 
     public static void tick(MinecraftClient client) {
-        if (!AnimonFixConfig.resourcePackCryFallbacks()) {
+        if (!AnimonFixConfig.resourceCries()) {
             PENDING_CRIES.clear();
             return;
         }

@@ -23,18 +23,23 @@ public final class AnimonFixConfigScreen extends Screen {
             button.setMessage(ambientText());
         }).bounds(x, y, 260, 20).build());
 
-        this.addRenderableWidget(Button.builder(fallbackText(), button -> {
-            AnimonFixConfig.setResourcePackCryFallbacks(!AnimonFixConfig.resourcePackCryFallbacks());
-            button.setMessage(fallbackText());
+        this.addRenderableWidget(Button.builder(resourceCriesText(), button -> {
+            AnimonFixConfig.setResourceCries(!AnimonFixConfig.resourceCries());
+            button.setMessage(resourceCriesText());
         }).bounds(x, y + 24, 260, 20).build());
+
+        this.addRenderableWidget(Button.builder(battleCriesText(), button -> {
+            AnimonFixConfig.setBattleCries(!AnimonFixConfig.battleCries());
+            button.setMessage(battleCriesText());
+        }).bounds(x, y + 48, 260, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("Default Cobblemon Mode"), button -> {
             AnimonFixConfig.useDefaultCobblemonMode();
             this.rebuildWidgets();
-        }).bounds(x, y + 56, 260, 20).build());
+        }).bounds(x, y + 80, 260, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("Done"), button -> this.onClose())
-                .bounds(x, y + 88, 260, 20)
+                .bounds(x, y + 112, 260, 20)
                 .build());
     }
 
@@ -44,7 +49,7 @@ public final class AnimonFixConfigScreen extends Screen {
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 28, 0xFFFFFF);
         graphics.drawCenteredString(
                 this.font,
-                Component.literal("Missing cry fallbacks only affect Pokemon without Cobblemon sound keyframes."),
+                Component.literal("Battle cries use sound events like cobblemon:pokemon.bulbasaur.battle."),
                 this.width / 2,
                 48,
                 0xA0A0A0
@@ -63,8 +68,12 @@ public final class AnimonFixConfigScreen extends Screen {
         return Component.literal("Pokemon Ambient Sounds: " + onOff(AnimonFixConfig.pokemonAmbientSounds()));
     }
 
-    private static Component fallbackText() {
-        return Component.literal("Missing Cry Fallbacks: " + onOff(AnimonFixConfig.resourcePackCryFallbacks()));
+    private static Component resourceCriesText() {
+        return Component.literal("Resource Cries: " + onOff(AnimonFixConfig.resourceCries()));
+    }
+
+    private static Component battleCriesText() {
+        return Component.literal("Battle Cries: " + onOff(AnimonFixConfig.battleCries()));
     }
 
     private static String onOff(boolean value) {

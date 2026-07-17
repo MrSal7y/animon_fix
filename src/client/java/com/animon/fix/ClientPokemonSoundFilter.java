@@ -26,7 +26,7 @@ public final class ClientPokemonSoundFilter {
 
         if (isPokemonCry(id)) {
             markCry(id);
-            return false;
+            return !AnimonFixConfig.resourceCries() || BattleCryScheduler.shouldCancelNormalCry(sound);
         }
 
         if (!isPokemonAmbient(id)) {
