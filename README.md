@@ -53,6 +53,9 @@ filtering enabled and adds a regression test against Minecraft's actual method
 signatures. Mixins are registered in NeoForge's mod metadata so they also load
 in development runs. The Fabric version remains 1.0.2.
 
+The NeoForge JAR includes the existing Animon SoundFix PNG artwork from the
+[Modrinth project](https://modrinth.com/mod/animon-soundfix) for its mod-list logo.
+
 For NeoForge, install the NeoForge JAR alongside Cobblemon's NeoForge JAR and
 Kotlin for Forge. Remove the previous SoundFix JAR before installing 1.0.3.
 
