@@ -33,8 +33,8 @@ Put the built jar in your client `mods` folder alongside:
 Built jar:
 
 ```text
-build/libs/animon-fix-fabric-1.0.1.jar
-neoforge/build/libs/animon-fix-neoforge-1.0.1.jar
+build/libs/animon-fix-fabric-1.0.2.jar
+neoforge/build/libs/animon-fix-neoforge-1.0.3.jar
 ```
 
 Build it again with:
@@ -44,3 +44,30 @@ Build it again with:
 ```
 
 Forge note: the public Cobblemon 1.7.3 files for Minecraft 1.21.1 are Fabric and NeoForge, so this project currently builds those two platforms.
+
+## NeoForge 1.0.3
+
+Fixes a startup crash in `SoundManagerMixin`: the delayed sound method is named
+`playDelayed` on NeoForge. This release keeps both immediate and delayed sound
+filtering enabled and adds a regression test against Minecraft's actual method
+signatures. Mixins are registered in NeoForge's mod metadata so they also load
+in development runs. The Fabric version remains 1.0.2.
+
+For NeoForge, install the NeoForge JAR alongside Cobblemon's NeoForge JAR and
+Kotlin for Forge. Remove the previous SoundFix JAR before installing 1.0.3.
+
+Building requires Java 21 and local Cobblemon dependency JARs. Override the paths
+in `gradle.properties` for your machine. To build and test just the NeoForge
+artifact against the reported Minecraft 1.21.1 / NeoForge 21.1.251 /
+Cobblemon 1.8.1 setup:
+
+```sh
+bash ./gradlew :neoforge:build \
+  -Pneoforge_version=21.1.251 \
+  -Pcobblemon_jar=/absolute/path/Cobblemon-fabric-1.7.3+1.21.1.jar \
+  -Pcobblemon_neoforge_jar=/absolute/path/Cobblemon-neoforge-1.8.1+1.21.1.jar
+```
+
+The root Fabric project is configured by Gradle even for a NeoForge-only task,
+so its compile dependency path must also exist. On Windows use `gradlew.bat`
+and supply your Windows paths on one command line.

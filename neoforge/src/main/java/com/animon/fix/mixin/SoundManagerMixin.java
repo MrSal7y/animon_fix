@@ -17,7 +17,7 @@ public abstract class SoundManagerMixin {
         }
     }
 
-    @Inject(method = "play(Lnet/minecraft/client/resources/sounds/SoundInstance;I)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "playDelayed(Lnet/minecraft/client/resources/sounds/SoundInstance;I)V", at = @At("HEAD"), cancellable = true)
     private void animonFix$cancelDelayedDuplicatePokemonAmbient(SoundInstance sound, int delay, CallbackInfo ci) {
         if (ClientPokemonSoundFilter.shouldCancel(sound)) {
             ci.cancel();

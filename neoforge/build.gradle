@@ -2,7 +2,7 @@ plugins {
     id "net.neoforged.moddev" version "1.0.11"
 }
 
-version = rootProject.mod_version
+version = rootProject.neoforge_mod_version
 group = rootProject.maven_group
 
 base {
@@ -29,6 +29,13 @@ neoForge {
 
 dependencies {
     compileOnly files(rootProject.cobblemon_neoforge_jar)
+    testImplementation "org.junit.jupiter:junit-jupiter:5.10.3"
+    testImplementation "org.ow2.asm:asm-tree:9.7.1"
+    testRuntimeOnly files(sourceSets.main.compileClasspath)
+}
+
+test {
+    useJUnitPlatform()
 }
 
 processResources {
@@ -36,14 +43,6 @@ processResources {
 
     filesMatching("META-INF/neoforge.mods.toml") {
         expand "version": project.version
-    }
-}
-
-jar {
-    manifest {
-        attributes([
-                "MixinConfigs": "animon_fix.mixins.json"
-        ])
     }
 }
 
