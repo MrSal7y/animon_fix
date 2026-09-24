@@ -1,6 +1,8 @@
 package com.animon.fix;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import com.cobblemon.mod.common.Cobblemon;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.Sound;
@@ -16,12 +18,20 @@ import java.util.Map;
 public final class ClientPokemonSoundFilter {
     private static final long RECENT_CRY_MS = 1000L;
     private static final double MATCH_DISTANCE_SQUARED = 16.0D;
+    private static final AmbientCadence AMBIENT_CADENCE = new AmbientCadence();
+    private static ClientLevel soundLevel;
     private static final Map<String, Long> RECENT_CRIES = new HashMap<>();
 
     private ClientPokemonSoundFilter() {
     }
 
     public static boolean shouldCancel(SoundInstance sound) {
+        Minecraft client = Minecraft.getInstance();
+        if (soundLevel != client.level) {
+            soundLevel = client.level;
+            AMBIENT_CADENCE.clear();
+            RECENT_CRIES.clear();
+        }
         ResourceLocation id = sound.getLocation();
         if (!isPokemonSound(id)) {
             return false;
@@ -40,7 +50,15 @@ public final class ClientPokemonSoundFilter {
             return true;
         }
 
-        if (isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound)) {
+        PokemonEntity source = findPokemonAtSound(sound);
+        if (isRecentMatchingCry(id) || (source != null && (source.isBattling()
+                || !PokemonVoicePolicy.isWild(source) || CryAnimationTracker.shouldSuppressAmbient(source)))) {
+            SoundDiagnostics.playback("CANCEL_OWNED_OR_CRY", sound);
+            return true;
+        }
+        if (source != null && client.level != null && !AMBIENT_CADENCE.allow(source.getUUID(),
+                client.level.getGameTime(), Cobblemon.INSTANCE.getConfig().getAmbientPokemonCryTicks())) {
+            SoundDiagnostics.playback("CANCEL_AMBIENT_CADENCE", sound);
             return true;
         }
 
@@ -70,33 +88,23 @@ public final class ClientPokemonSoundFilter {
         return expiresAt != null && expiresAt >= now;
     }
 
-    private static boolean isOwnedOrBattlingPokemonAtSound(SoundInstance sound) {
+    private static PokemonEntity findPokemonAtSound(SoundInstance sound) {
         Minecraft client = Minecraft.getInstance();
-        if (client.level == null) {
-            return false;
-        }
-
-        double x = sound.getX();
-        double y = sound.getY();
-        double z = sound.getZ();
+        if (client.level == null || sound.isRelative()) return null;
+        PokemonEntity closest = null;
+        double closestDistance = MATCH_DISTANCE_SQUARED;
+        String base = basePokemonSoundPath(sound.getLocation());
         for (Entity entity : client.level.entitiesForRendering()) {
-            if (!(entity instanceof PokemonEntity pokemonEntity)) {
-                continue;
-            }
-
-            if (entity.distanceToSqr(x, y, z) > MATCH_DISTANCE_SQUARED) {
-                continue;
-            }
-
-            if (pokemonEntity.isBattling()
-                    || CryAnimationTracker.shouldSuppressAmbient(entity)
-                    || pokemonEntity.getPokemon().getOwnerUUID() != null
-                    || !pokemonEntity.getPokemon().isWild()) {
-                return true;
+            if (!(entity instanceof PokemonEntity pokemon)) continue;
+            if (!PokemonVoicePolicy.matchesSpecies(base,
+                    pokemon.getPokemon().getSpecies().getResourceIdentifier().getPath())) continue;
+            double distance = entity.distanceToSqr(sound.getX(), sound.getY(), sound.getZ());
+            if (distance <= closestDistance) {
+                closestDistance = distance;
+                closest = pokemon;
             }
         }
-
-        return false;
+        return closest;
     }
 
     private static boolean playCryForBuiltInAmbient(SoundInstance sound) {

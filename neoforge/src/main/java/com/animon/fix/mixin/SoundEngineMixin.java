@@ -29,9 +29,9 @@ public abstract class SoundEngineMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/SoundInstance;getLocation()Lnet/minecraft/resources/ResourceLocation;"),
             cancellable = true)
     private void animonFix$filterPlayback(SoundInstance sound, CallbackInfo ci) {
-        if (ClientPokemonSoundFilter.shouldCancel(sound)
-                || instanceToChannel.keySet().stream().anyMatch(active ->
-                    ClientPokemonSoundFilter.isOverlappingAmbient(sound, active))) {
+        if (instanceToChannel.keySet().stream().anyMatch(active ->
+                    ClientPokemonSoundFilter.isOverlappingAmbient(sound, active))
+                || ClientPokemonSoundFilter.shouldCancel(sound)) {
             SoundDiagnostics.playback("CANCEL", sound);
             ci.cancel();
             return;

@@ -3,6 +3,7 @@ package com.animon.fix.mixin;
 import com.animon.fix.AnimonFixConfig;
 import com.animon.fix.SoundDiagnostics;
 import com.animon.fix.CryAnimationTracker;
+import com.animon.fix.PokemonVoicePolicy;
 import com.cobblemon.mod.common.client.render.models.blockbench.PosableState;
 import com.cobblemon.mod.common.client.render.models.blockbench.bedrock.animation.BedrockSoundKeyframe;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
@@ -33,7 +34,7 @@ public abstract class BedrockSoundKeyframeMixin {
         }
 
         if (entity instanceof PokemonEntity pokemonEntity) {
-            if (!pokemonEntity.getPokemon().isWild() || CryAnimationTracker.shouldSuppressAmbient(entity)) {
+            if (!PokemonVoicePolicy.isWild(pokemonEntity) || CryAnimationTracker.shouldSuppressAmbient(entity)) {
                 ci.cancel();
             }
             return;

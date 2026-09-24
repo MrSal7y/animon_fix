@@ -8,6 +8,8 @@ provide separate Pokémon ambient voices and cries.
 
 - Prevents owned or battling Pokémon from playing ambient voices over their cries.
 - Preserves resource-pack ambient voices for wild Pokémon.
+- On NeoForge, spaces repeated wild ambient requests using Cobblemon’s configured
+  ambient interval, separately for each Pokémon, without generating extra sounds.
 - Uses a default Pokémon cry when an ambient sound has no resource-pack override.
 - Keeps cry audio synchronised with its animation.
 - Supplies a fallback for owned Pokémon whose cry animation has no sound keyframe.

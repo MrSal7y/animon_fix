@@ -76,6 +76,7 @@ public final class SoundDiagnostics {
         if (entity instanceof PokemonEntity pokemon) {
             return entity.getId() + ":" + pokemon.getPokemon().getSpecies().getResourceIdentifier()
                     + ":wild=" + pokemon.getPokemon().isWild() + ":owned=" + (pokemon.getPokemon().getOwnerUUID() != null)
+                    + ":entityOwned=" + (pokemon.getOwnerUUID() != null) + ":tamed=" + pokemon.isTame()
                     + ":battle=" + pokemon.isBattling() + ":tick=" + entity.tickCount;
         }
         return Integer.toString(entity.getId());

@@ -24,7 +24,7 @@ public final class FallbackCryScheduler {
             return;
         }
 
-        if (!CryFallbackPolicy.needsFallback(pokemonEntity.getPokemon().isWild(), animation)) {
+        if (!CryFallbackPolicy.needsFallback(PokemonVoicePolicy.isWild(pokemonEntity), animation)) {
             // A replacement animation with its own audio supersedes any pending fallback.
             PENDING_CRIES.remove(entity.getUUID());
             return;

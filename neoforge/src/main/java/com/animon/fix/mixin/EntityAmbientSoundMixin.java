@@ -1,6 +1,7 @@
 package com.animon.fix.mixin;
 
 import com.animon.fix.CryAnimationTracker;
+import com.animon.fix.PokemonVoicePolicy;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -24,7 +25,7 @@ public abstract class EntityAmbientSoundMixin {
             return;
         }
 
-        if (!pokemonEntity.getPokemon().isWild() || CryAnimationTracker.shouldSuppressAmbient(pokemonEntity)) {
+        if (!PokemonVoicePolicy.isWild(pokemonEntity) || CryAnimationTracker.shouldSuppressAmbient(pokemonEntity)) {
             ci.cancel();
         }
     }
