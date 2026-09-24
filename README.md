@@ -1,76 +1,31 @@
 # Animon SoundFix
 
-Client-side Fabric and NeoForge addon for Cobblemon 1.7.3 on Minecraft 1.21.1.
+A client-side Cobblemon addon for Minecraft 1.21.1, available for Fabric and
+NeoForge. It is designed for the Animon resource pack and other packs that
+provide separate Pokémon ambient voices and cries.
 
-This mod is intended to be used alongside the Animon resource pack. It can also help any other Cobblemon resource pack that adds separate Pokemon ambient sounds and cry sounds.
+## Sound behaviour
 
-## What It Does
+- Prevents owned or battling Pokémon from playing ambient voices over their cries.
+- Preserves resource-pack ambient voices for wild Pokémon.
+- Uses a default Pokémon cry when an ambient sound has no resource-pack override.
+- Keeps cry audio synchronised with its animation.
+- Supplies a fallback for owned Pokémon whose cry animation has no sound keyframe.
+  On NeoForge, this does not add cries to wild Pokémon or play ahead of a delayed
+  sound keyframe.
+- On NeoForge, checks delayed sounds when they play and stops matching nearby
+  ambient audio that is already playing when a cry begins.
+- Supports optional battle cries from sound events such as
+  `cobblemon:pokemon.bulbasaur.battle`. Battle cries are disabled by default.
 
-- Stops owned or battling Pokemon from playing their ambient sound on top of their cry sound when they are sent out or enter a cry animation.
-- Keeps normal wild Pokemon ambient sounds working.
-- Falls back to normal Pokemon cries in the wild when no ambient sound event exists.
-- Leaves Cobblemon cry sounds alone so cry audio can stay synced with cry animations.
-- Adds a fallback cry trigger for Pokemon where Cobblemon has a cry animation but no sound keyframe, allowing resource-pack cries such as `cobblemon:pokemon.<species>.cry` to play.
-- Adds optional battle cries using sound events such as `cobblemon:pokemon.<species>.battle`.
-- Adds an in-game config screen, opened with the configurable Controls keybind. The default key is `#`.
-- Runs client-side only, so it can be used when joining servers that do not have this addon installed.
+## Settings
 
-## In-Game Settings
+Open the in-game settings using the configurable keybind in Controls. The default
+key is `#`.
 
-The config screen lets you turn Pokemon ambient sounds on or off, adjust ambient and cry volume with `-` and `+` buttons, and enable battle cries. Volume buttons move by 1%, or 10% while holding Shift. Battle cries are off by default and can be enabled if your resource pack provides battle sound events.
+You can enable or disable Pokémon ambient sounds, adjust ambient and cry volume,
+enable battle cries, and reset settings to their defaults. Volume buttons adjust
+by 1%, or 10% while holding Shift.
 
-For battle cries, add a sound event like `pokemon.bulbasaur.battle` in your resource pack `sounds.json` and point it at an OGG such as `sounds/pokemon/bulbasaur/bulbasaur_battle.ogg`.
-
-## Installation
-
-Put the built jar in your client `mods` folder alongside:
-
-- Fabric Loader
-- Fabric API
-- Cobblemon
-- Animon, or another Cobblemon resource pack that enables Pokemon ambient sounds
-
-Built jar:
-
-```text
-build/libs/animon-fix-fabric-1.0.2.jar
-neoforge/build/libs/animon-fix-neoforge-1.0.3.jar
-```
-
-Build it again with:
-
-```powershell
-.\gradlew.bat build
-```
-
-Forge note: the public Cobblemon 1.7.3 files for Minecraft 1.21.1 are Fabric and NeoForge, so this project currently builds those two platforms.
-
-## NeoForge 1.0.3
-
-Fixes a startup crash in `SoundManagerMixin`: the delayed sound method is named
-`playDelayed` on NeoForge. This release keeps both immediate and delayed sound
-filtering enabled and adds a regression test against Minecraft's actual method
-signatures. Mixins are registered in NeoForge's mod metadata so they also load
-in development runs. The Fabric version remains 1.0.2.
-
-The NeoForge JAR includes the existing Animon SoundFix PNG artwork from the
-[Modrinth project](https://modrinth.com/mod/animon-soundfix) for its mod-list logo.
-
-For NeoForge, install the NeoForge JAR alongside Cobblemon's NeoForge JAR and
-Kotlin for Forge. Remove the previous SoundFix JAR before installing 1.0.3.
-
-Building requires Java 21 and local Cobblemon dependency JARs. Override the paths
-in `gradle.properties` for your machine. To build and test just the NeoForge
-artifact against the reported Minecraft 1.21.1 / NeoForge 21.1.251 /
-Cobblemon 1.8.1 setup:
-
-```sh
-bash ./gradlew :neoforge:build \
-  -Pneoforge_version=21.1.251 \
-  -Pcobblemon_jar=/absolute/path/Cobblemon-fabric-1.7.3+1.21.1.jar \
-  -Pcobblemon_neoforge_jar=/absolute/path/Cobblemon-neoforge-1.8.1+1.21.1.jar
-```
-
-The root Fabric project is configured by Gradle even for a NeoForge-only task,
-so its compile dependency path must also exist. On Windows use `gradlew.bat`
-and supply your Windows paths on one command line.
+The addon runs on the client and can be used on servers that do not have it
+installed.

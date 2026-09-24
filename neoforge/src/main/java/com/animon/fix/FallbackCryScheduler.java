@@ -1,6 +1,7 @@
 package com.animon.fix;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -18,13 +19,18 @@ public final class FallbackCryScheduler {
     private FallbackCryScheduler() {
     }
 
-    public static void schedule(Entity entity) {
+    public static void schedule(Entity entity, ActiveAnimation animation) {
         if (!(entity instanceof PokemonEntity pokemonEntity)) {
             return;
         }
 
+        if (!CryFallbackPolicy.needsFallback(pokemonEntity.getPokemon().isWild(), animation)) {
+            // A replacement animation with its own audio supersedes any pending fallback.
+            PENDING_CRIES.remove(entity.getUUID());
+            return;
+        }
         ResourceLocation soundId = getCrySoundId(pokemonEntity);
-        PENDING_CRIES.put(entity.getUUID(), new PendingCry(entity.getId(), soundId, System.currentTimeMillis() + FALLBACK_DELAY_MS));
+        PENDING_CRIES.putIfAbsent(entity.getUUID(), new PendingCry(entity, soundId, System.currentTimeMillis() + FALLBACK_DELAY_MS));
     }
 
     public static void tick(Minecraft client) {
@@ -46,8 +52,12 @@ public final class FallbackCryScheduler {
                 continue;
             }
 
-            Entity entity = client.level.getEntity(pendingCry.entityId);
-            if (!(entity instanceof PokemonEntity pokemonEntity) || entity.isRemoved()) {
+            Entity entity = pendingCry.entity;
+            if (!(entity instanceof PokemonEntity pokemonEntity) || entity.isRemoved() || entity.level() != client.level) {
+                continue;
+            }
+
+            if (!client.getSoundManager().getAvailableSounds().contains(pendingCry.soundId)) {
                 continue;
             }
 
@@ -69,6 +79,6 @@ public final class FallbackCryScheduler {
         return ResourceLocation.fromNamespaceAndPath("cobblemon", "pokemon." + species + ".cry");
     }
 
-    private record PendingCry(int entityId, ResourceLocation soundId, long playAt) {
+    private record PendingCry(Entity entity, ResourceLocation soundId, long playAt) {
     }
 }

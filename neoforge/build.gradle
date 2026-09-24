@@ -30,8 +30,9 @@ neoForge {
 dependencies {
     compileOnly files(rootProject.cobblemon_neoforge_jar)
     testImplementation "org.junit.jupiter:junit-jupiter:5.10.3"
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:2.2.20"
     testImplementation "org.ow2.asm:asm-tree:9.7.1"
-    testRuntimeOnly files(sourceSets.main.compileClasspath)
+    testImplementation files(sourceSets.main.compileClasspath)
 }
 
 test {

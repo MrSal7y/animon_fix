@@ -5,16 +5,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public final class ClientPokemonSoundFilter {
@@ -48,7 +44,13 @@ public final class ClientPokemonSoundFilter {
             return true;
         }
 
-        return usesOnlyCobblemonSoundResource(id) && playCryForBuiltInAmbient(sound);
+        return usesOnlyCobblemonSoundResource(sound) && playCryForBuiltInAmbient(sound);
+    }
+
+    public static boolean isOverlappingAmbient(SoundInstance ambient, SoundInstance cry) {
+        return SoundOverlapPolicy.overlaps(
+                ambient.getLocation().toString(), ambient.getX(), ambient.getY(), ambient.getZ(), ambient.isRelative(),
+                cry.getLocation().toString(), cry.getX(), cry.getY(), cry.getZ(), cry.isRelative());
     }
 
     public static boolean hasRecentCry(ResourceLocation id) {
@@ -121,26 +123,20 @@ public final class ClientPokemonSoundFilter {
         return true;
     }
 
-    private static boolean usesOnlyCobblemonSoundResource(ResourceLocation id) {
-        Minecraft client = Minecraft.getInstance();
-        WeighedSoundEvents soundEvent = client.getSoundManager().getSoundEvent(id);
-        if (soundEvent == null) {
+    private static boolean usesOnlyCobblemonSoundResource(SoundInstance instance) {
+        // SoundEngine has already resolved the instance. Never randomly choose a
+        // second variant just to decide whether the sound being played is overridden.
+        Sound selectedSound = instance.getSound();
+        if (selectedSound == null || selectedSound == SoundManager.EMPTY_SOUND
+                || selectedSound == SoundManager.INTENTIONALLY_EMPTY_SOUND) {
             return false;
         }
-
-        Sound selectedSound = soundEvent.getSound(SoundInstance.createUnseededRandom());
-        if (selectedSound == SoundManager.EMPTY_SOUND || selectedSound == SoundManager.INTENTIONALLY_EMPTY_SOUND) {
-            return false;
-        }
-
-        ResourceLocation soundFile = selectedSound.getLocation();
-        ResourceLocation resourceId = ResourceLocation.fromNamespaceAndPath(soundFile.getNamespace(), "sounds/" + soundFile.getPath() + ".ogg");
-        List<Resource> resources = client.getResourceManager().getResourceStack(resourceId);
-        return !resources.isEmpty() && resources.stream().allMatch(resource -> isCobblemonPack(resource.sourcePackId()));
-    }
-
-    private static boolean isCobblemonPack(String packId) {
-        return packId.toLowerCase(Locale.ROOT).contains("cobblemon");
+        ResourceLocation file = selectedSound.getLocation();
+        ResourceLocation resourceId = ResourceLocation.fromNamespaceAndPath(
+                file.getNamespace(), "sounds/" + file.getPath() + ".ogg");
+        return Minecraft.getInstance().getResourceManager().getResource(resourceId)
+                .map(resource -> AmbientResourcePolicy.isBuiltIn(resource.sourcePackId()))
+                .orElse(false);
     }
 
     private static boolean hasSoundEvent(ResourceLocation id) {
