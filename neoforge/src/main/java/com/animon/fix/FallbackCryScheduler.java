@@ -61,6 +61,7 @@ public final class FallbackCryScheduler {
                 continue;
             }
 
+            SoundDiagnostics.animation("FALLBACK_CRY", entity, pendingCry.soundId);
             client.level.playLocalSound(
                     entity.getX(),
                     entity.getY(),

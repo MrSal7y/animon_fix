@@ -1,6 +1,7 @@
 package com.animon.fix.mixin;
 
 import com.animon.fix.ClientPokemonSoundFilter;
+import com.animon.fix.SoundDiagnostics;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
@@ -31,13 +32,16 @@ public abstract class SoundEngineMixin {
         if (ClientPokemonSoundFilter.shouldCancel(sound)
                 || instanceToChannel.keySet().stream().anyMatch(active ->
                     ClientPokemonSoundFilter.isOverlappingAmbient(sound, active))) {
+            SoundDiagnostics.playback("CANCEL", sound);
             ci.cancel();
             return;
         }
+        SoundDiagnostics.playback("ALLOW", sound);
         // Ambient may already have started before the cry packet/animation arrived.
         // Stop just that nearby matching voice, never battle music or other species.
         for (SoundInstance active : instanceToChannel.keySet()) {
             if (ClientPokemonSoundFilter.isOverlappingAmbient(active, sound)) {
+                SoundDiagnostics.playback("STOP_OVERLAP", active);
                 stop(active);
             }
         }

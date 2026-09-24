@@ -1,6 +1,7 @@
 package com.animon.fix.mixin;
 
 import com.animon.fix.AnimonFixConfig;
+import com.animon.fix.SoundDiagnostics;
 import com.animon.fix.CryAnimationTracker;
 import com.cobblemon.mod.common.client.render.models.blockbench.PosableState;
 import com.cobblemon.mod.common.client.render.models.blockbench.bedrock.animation.BedrockSoundKeyframe;
@@ -26,6 +27,7 @@ public abstract class BedrockSoundKeyframeMixin {
     )
     private void animonFix$cancelAmbientDuringCry(Entity entity, PosableState state, CallbackInfo ci) {
         ResourceLocation sound = this.getSound();
+        SoundDiagnostics.animation("KEYFRAME", entity, sound);
         if (!isPokemonSound(sound) || isPokemonCry(sound)) {
             return;
         }

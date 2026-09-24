@@ -21,6 +21,7 @@ public final class AnimonFixNeoForge {
 
     public AnimonFixNeoForge(IEventBus modEventBus) {
         AnimonFixConfig.load();
+        SoundDiagnostics.note("START NeoForge 1.0.3 playback trace");
         modEventBus.addListener(AnimonFixNeoForge::registerKeys);
         NeoForge.EVENT_BUS.addListener(AnimonFixNeoForge::onClientTick);
     }
