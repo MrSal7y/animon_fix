@@ -6,7 +6,7 @@ provide separate Pokémon ambient voices and cries.
 
 ## Compatibility
 
-- Fabric release `1.0.3`: Cobblemon `1.8.0` or `1.8.1`, Minecraft `1.21.1`,
+- Fabric release `1.0.4`: Cobblemon `1.8.0` or `1.8.1`, Minecraft `1.21.1`,
   Java 21, Fabric Loader `0.17.2` or newer, and Fabric API `0.116.6+1.21.1`
   or newer. Cobblemon `1.7.x` is no longer supported by this Fabric release.
 - NeoForge release `1.0.3` retains its existing Cobblemon `1.7.3` target.
@@ -47,7 +47,7 @@ installed.
 With JDK 21 installed, run `./gradlew :build` (or `gradlew.bat :build` on Windows).
 Use the leading `:` to build only Fabric. Dependencies are downloaded automatically;
 no local Cobblemon jar path is needed. The installable jar is
-`build/libs/animon-fix-fabric-1.0.3.jar`.
+`build/libs/animon-fix-fabric-1.0.4.jar`.
 
 The default dependency is Cobblemon Fabric 1.8.1. To run the same build and regression
 checks against 1.8.0, use `./gradlew :build -Pcobblemon_fabric_version=YgmyyFcs`.
