@@ -1,10 +1,10 @@
 package com.animon.fix;
 
+import com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -18,17 +18,22 @@ public final class FallbackCryScheduler {
     private FallbackCryScheduler() {
     }
 
-    public static void schedule(Entity entity) {
+    public static void schedule(Entity entity, ActiveAnimation animation) {
         if (!(entity instanceof PokemonEntity pokemonEntity)) {
             return;
         }
 
-        Identifier soundId = getCrySoundId(pokemonEntity);
-        PENDING_CRIES.put(entity.getUuid(), new PendingCry(entity.getId(), soundId, System.currentTimeMillis() + FALLBACK_DELAY_MS));
+        if (!CryFallbackPolicy.needsFallback(PokemonVoicePolicy.isWild(pokemonEntity), animation)) {
+            // A replacement animation with its own audio supersedes any pending fallback.
+            PENDING_CRIES.remove(entity.getUUID());
+            return;
+        }
+        ResourceLocation soundId = getCrySoundId(pokemonEntity);
+        PENDING_CRIES.putIfAbsent(entity.getUUID(), new PendingCry(entity, soundId, System.currentTimeMillis() + FALLBACK_DELAY_MS));
     }
 
-    public static void tick(MinecraftClient client) {
-        if (client.world == null || PENDING_CRIES.isEmpty()) {
+    public static void tick(Minecraft client) {
+        if (client.level == null || PENDING_CRIES.isEmpty()) {
             PENDING_CRIES.clear();
             return;
         }
@@ -42,24 +47,30 @@ public final class FallbackCryScheduler {
             }
 
             iterator.remove();
-            if (ClientPokemonSoundFilter.hasRecentCry(pendingCry.soundId)) {
+            if (ClientPokemonSoundFilter.hasRecentCry(pendingCry.soundId, pendingCry.entity)) {
                 continue;
             }
 
-            Entity entity = client.world.getEntityById(pendingCry.entityId);
-            if (!(entity instanceof PokemonEntity pokemonEntity) || entity.isRemoved()) {
+            Entity entity = pendingCry.entity;
+            if (!(entity instanceof PokemonEntity pokemonEntity) || entity.isRemoved() || entity.level() != client.level
+                    || PokemonVoicePolicy.isWild(pokemonEntity)) {
                 continue;
             }
 
-            client.world.playSoundFromEntity(entity, SoundEvent.of(pendingCry.soundId), pokemonEntity.getSoundCategory(), AnimonFixConfig.cryVoiceVolume(), 1.0F);
+            if (!client.getSoundManager().getAvailableSounds().contains(pendingCry.soundId)) {
+                continue;
+            }
+            client.getSoundManager().play(PokemonSoundPlayback.create(pokemonEntity, pendingCry.soundId));
         }
     }
 
-    private static Identifier getCrySoundId(PokemonEntity pokemonEntity) {
+    public static void clear() { PENDING_CRIES.clear(); }
+
+    private static ResourceLocation getCrySoundId(PokemonEntity pokemonEntity) {
         String species = pokemonEntity.getPokemon().getSpecies().getResourceIdentifier().getPath();
-        return Identifier.of("cobblemon", "pokemon." + species + ".cry");
+        return ResourceLocation.fromNamespaceAndPath("cobblemon", "pokemon." + species + ".cry");
     }
 
-    private record PendingCry(int entityId, Identifier soundId, long playAt) {
+    private record PendingCry(Entity entity, ResourceLocation soundId, long playAt) {
     }
 }

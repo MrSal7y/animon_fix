@@ -1,15 +1,15 @@
 package com.animon.fix;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 public final class AnimonFixConfigScreen extends Screen {
     private final Screen parent;
 
     public AnimonFixConfigScreen(Screen parent) {
-        super(Text.literal("Animon SoundFix"));
+        super(Component.literal("Animon SoundFix"));
         this.parent = parent;
     }
 
@@ -18,85 +18,85 @@ public final class AnimonFixConfigScreen extends Screen {
         int x = this.width / 2 - 130;
         int y = this.height / 2 - 60;
 
-        this.addDrawableChild(ButtonWidget.builder(ambientText(), button -> {
+        this.addRenderableWidget(Button.builder(ambientText(), button -> {
             AnimonFixConfig.setPokemonAmbientSounds(!AnimonFixConfig.pokemonAmbientSounds());
             button.setMessage(ambientText());
-        }).dimensions(x, y, 260, 20).build());
+        }).bounds(x, y, 260, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("-"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal("-"), button -> {
             AnimonFixConfig.adjustAmbientVoiceVolume(step(-1));
-            this.clearAndInit();
-        }).dimensions(x, y + 24, 32, 20).build());
+            this.rebuildWidgets();
+        }).bounds(x, y + 24, 32, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(ambientVolumeText(), button -> {
-        }).dimensions(x + 36, y + 24, 188, 20).build());
+        this.addRenderableWidget(Button.builder(ambientVolumeText(), button -> {
+        }).bounds(x + 36, y + 24, 188, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("+"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal("+"), button -> {
             AnimonFixConfig.adjustAmbientVoiceVolume(step(1));
-            this.clearAndInit();
-        }).dimensions(x + 228, y + 24, 32, 20).build());
+            this.rebuildWidgets();
+        }).bounds(x + 228, y + 24, 32, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("-"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal("-"), button -> {
             AnimonFixConfig.adjustCryVoiceVolume(step(-1));
-            this.clearAndInit();
-        }).dimensions(x, y + 48, 32, 20).build());
+            this.rebuildWidgets();
+        }).bounds(x, y + 48, 32, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(cryVolumeText(), button -> {
-        }).dimensions(x + 36, y + 48, 188, 20).build());
+        this.addRenderableWidget(Button.builder(cryVolumeText(), button -> {
+        }).bounds(x + 36, y + 48, 188, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("+"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal("+"), button -> {
             AnimonFixConfig.adjustCryVoiceVolume(step(1));
-            this.clearAndInit();
-        }).dimensions(x + 228, y + 48, 32, 20).build());
+            this.rebuildWidgets();
+        }).bounds(x + 228, y + 48, 32, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(battleCriesText(), button -> {
+        this.addRenderableWidget(Button.builder(battleCriesText(), button -> {
             AnimonFixConfig.setBattleCries(!AnimonFixConfig.battleCries());
             button.setMessage(battleCriesText());
-        }).dimensions(x, y + 72, 260, 20).build());
+        }).bounds(x, y + 72, 260, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Reset Defaults"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal("Reset Defaults"), button -> {
             AnimonFixConfig.useRegularDefaults();
-            this.clearAndInit();
-        }).dimensions(x, y + 104, 260, 20).build());
+            this.rebuildWidgets();
+        }).bounds(x, y + 104, 260, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Default Cobblemon Mode"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal("Default Cobblemon Mode"), button -> {
             AnimonFixConfig.useDefaultCobblemonMode();
-            this.clearAndInit();
-        }).dimensions(x, y + 128, 260, 20).build());
+            this.rebuildWidgets();
+        }).bounds(x, y + 128, 260, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> this.close())
-                .dimensions(x, y + 160, 260, 20)
+        this.addRenderableWidget(Button.builder(Component.literal("Done"), button -> this.onClose())
+                .bounds(x, y + 160, 260, 20)
                 .build());
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 24, 0xFFFFFF);
+        context.drawCenteredString(this.font, this.title, this.width / 2, 24, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public void close() {
-        if (this.client != null) {
-            this.client.setScreen(this.parent);
+    public void onClose() {
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(this.parent);
         }
     }
 
-    private static Text ambientText() {
-        return Text.literal("Pokemon Ambient Sounds: " + onOff(AnimonFixConfig.pokemonAmbientSounds()));
+    private static Component ambientText() {
+        return Component.literal("Pokemon Ambient Sounds: " + onOff(AnimonFixConfig.pokemonAmbientSounds()));
     }
 
-    private static Text ambientVolumeText() {
-        return Text.literal("Ambient Volume: " + AnimonFixConfig.ambientVoiceVolumePercent() + "%");
+    private static Component ambientVolumeText() {
+        return Component.literal("Ambient Volume: " + AnimonFixConfig.ambientVoiceVolumePercent() + "%");
     }
 
-    private static Text cryVolumeText() {
-        return Text.literal("Cry Volume: " + AnimonFixConfig.cryVoiceVolumePercent() + "%");
+    private static Component cryVolumeText() {
+        return Component.literal("Cry Volume: " + AnimonFixConfig.cryVoiceVolumePercent() + "%");
     }
 
-    private static Text battleCriesText() {
-        return Text.literal("Battle Cries: " + onOff(AnimonFixConfig.battleCries()));
+    private static Component battleCriesText() {
+        return Component.literal("Battle Cries: " + onOff(AnimonFixConfig.battleCries()));
     }
 
     private static String onOff(boolean value) {

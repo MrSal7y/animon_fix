@@ -9,7 +9,7 @@
     "PokemonClientDelegateCryMixin",
     "PosableStateCryAnimationMixin",
     "PlayPosableAnimationHandlerMixin",
-    "SoundManagerMixin"
+    "SoundEngineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

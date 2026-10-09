@@ -1,197 +1,158 @@
 package com.animon.fix;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.Sound;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.client.sound.WeightedSoundSet;
-import net.minecraft.entity.Entity;
-import net.minecraft.resource.Resource;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.resources.sounds.Sound;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 
 public final class ClientPokemonSoundFilter {
     private static final long RECENT_CRY_MS = 1000L;
     private static final double MATCH_DISTANCE_SQUARED = 16.0D;
-    private static final Map<String, Long> RECENT_CRIES = new HashMap<>();
+    private static final RecentVoiceTracker RECENT_CRIES = new RecentVoiceTracker();
+    private static ClientLevel soundWorld;
 
-    private ClientPokemonSoundFilter() {
+    private ClientPokemonSoundFilter() {}
+
+    public static void tick(Minecraft client) {
+        if (soundWorld != client.level) {
+            soundWorld = client.level;
+            RECENT_CRIES.clear();
+            CryAnimationTracker.clear();
+            FallbackCryScheduler.clear();
+            BattleCryScheduler.clear();
+        }
     }
 
     public static boolean shouldCancel(SoundInstance sound) {
-        Identifier id = sound.getId();
-        if (!isPokemonSound(id)) {
-            return false;
-        }
-
+        ResourceLocation id = sound.getLocation();
+        if (!isPokemonSound(id)) return false;
         if (isPokemonCry(id)) {
-            markCry(id);
-            return BattleCryScheduler.shouldCancelNormalCry(sound);
-        }
-
-        if (!isPokemonAmbient(id)) {
+            if (BattleCryScheduler.shouldCancelNormalCry(sound)) return true;
+            markCry(sound);
             return false;
         }
+        if (isPokemonBattle(id)) {
+            markCry(sound);
+            return false;
+        }
+        if (!isPokemonAmbient(id)) return false;
+        if (!AnimonFixConfig.pokemonAmbientSounds()) return true;
 
-        if (!AnimonFixConfig.pokemonAmbientSounds()) {
+        PokemonEntity source = findPokemonAtSound(sound);
+        if (hasRecentCry(id, sound.getX(), sound.getY(), sound.getZ(), sound.isRelative())
+                || (source != null && (source.isBattling() || !PokemonVoicePolicy.isWild(source)
+                || CryAnimationTracker.shouldSuppressAmbient(source)))) {
             return true;
         }
-
-        if (isRecentMatchingCry(id) || isOwnedOrBattlingPokemonAtSound(sound)) {
-            return true;
-        }
-
-        return usesOnlyCobblemonSoundResource(id) && playCryForBuiltInAmbient(sound);
+        return usesOnlyCobblemonSoundResource(sound) && playCryForBuiltInAmbient(sound, source);
     }
 
-    public static boolean hasRecentCry(Identifier id) {
-        return isRecentMatchingCry(id);
+    public static float voiceVolume(ResourceLocation id) {
+        if (!isPokemonSound(id)) return 1.0F;
+        if (isPokemonCry(id) || isPokemonBattle(id)) return AnimonFixConfig.cryVoiceVolume();
+        if (isPokemonAmbient(id)) return AnimonFixConfig.ambientVoiceVolume();
+        return 1.0F;
     }
 
-    private static void markCry(Identifier id) {
+    public static boolean isOverlappingAmbient(SoundInstance ambient, SoundInstance cry) {
+        return isPokemonAmbient(ambient.getLocation()) && (isPokemonCry(cry.getLocation()) || isPokemonBattle(cry.getLocation()))
+                && basePokemonSoundPath(ambient.getLocation()).equals(basePokemonSoundPath(cry.getLocation()))
+                && ambient.isRelative() == cry.isRelative()
+                && RecentVoiceTracker.squaredDistance(ambient.getX(), ambient.getY(), ambient.getZ(),
+                        cry.getX(), cry.getY(), cry.getZ()) <= MATCH_DISTANCE_SQUARED;
+    }
+
+    public static boolean hasRecentCry(ResourceLocation id, Entity entity) {
+        return hasRecentCry(id, entity.getX(), entity.getY(), entity.getZ(), false);
+    }
+
+    private static boolean hasRecentCry(ResourceLocation id, double x, double y, double z, boolean relative) {
+        return RECENT_CRIES.contains(basePokemonSoundPath(id), x, y, z, relative, System.currentTimeMillis());
+    }
+
+    private static void markCry(SoundInstance sound) {
         long now = System.currentTimeMillis();
-        prune(now);
-        RECENT_CRIES.put(basePokemonSoundPath(id), now + RECENT_CRY_MS);
+        RECENT_CRIES.mark(basePokemonSoundPath(sound.getLocation()), sound.getX(), sound.getY(), sound.getZ(),
+                sound.isRelative(), now + RECENT_CRY_MS, now);
     }
 
-    private static boolean isRecentMatchingCry(Identifier id) {
-        long now = System.currentTimeMillis();
-        prune(now);
-        Long expiresAt = RECENT_CRIES.get(basePokemonSoundPath(id));
-        return expiresAt != null && expiresAt >= now;
+    private static PokemonEntity findPokemonAtSound(SoundInstance sound) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.level == null || sound.isRelative()) return null;
+        PokemonEntity closest = null;
+        double closestDistance = MATCH_DISTANCE_SQUARED;
+        String base = basePokemonSoundPath(sound.getLocation());
+        for (Entity entity : client.level.entitiesForRendering()) {
+            if (!(entity instanceof PokemonEntity pokemon)) continue;
+            if (!PokemonVoicePolicy.matchesSpecies(base,
+                    pokemon.getPokemon().getSpecies().getResourceIdentifier().getPath())) continue;
+            double distance = entity.distanceToSqr(sound.getX(), sound.getY(), sound.getZ());
+            if (distance <= closestDistance) {
+                closestDistance = distance;
+                closest = pokemon;
+            }
+        }
+        return closest;
     }
 
-    private static boolean isOwnedOrBattlingPokemonAtSound(SoundInstance sound) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world == null) {
-            return false;
+    private static boolean playCryForBuiltInAmbient(SoundInstance sound, PokemonEntity source) {
+        ResourceLocation cryId = toCrySoundId(sound.getLocation());
+        Minecraft client = Minecraft.getInstance();
+        if (!client.getSoundManager().getAvailableSounds().contains(cryId) || client.level == null) return false;
+        if (source != null) {
+            client.getSoundManager().play(PokemonSoundPlayback.create(source, cryId));
+        } else {
+            client.level.playLocalSound(sound.getX(), sound.getY(), sound.getZ(), SoundEvent.createVariableRangeEvent(cryId),
+                    sound.getSource(), sound.getVolume(), sound.getPitch(), false);
         }
-
-        double x = sound.getX();
-        double y = sound.getY();
-        double z = sound.getZ();
-        for (Entity entity : client.world.getEntities()) {
-            if (!(entity instanceof PokemonEntity pokemonEntity)) {
-                continue;
-            }
-
-            if (entity.squaredDistanceTo(x, y, z) > MATCH_DISTANCE_SQUARED) {
-                continue;
-            }
-
-            if (pokemonEntity.isBattling()
-                    || CryAnimationTracker.shouldSuppressAmbient(entity)
-                    || pokemonEntity.getPokemon().getOwnerUUID() != null
-                    || !pokemonEntity.getPokemon().isWild()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean playCryForBuiltInAmbient(SoundInstance sound) {
-        Identifier cryId = toCrySoundId(sound.getId());
-        if (!hasSoundEvent(cryId)) {
-            return false;
-        }
-
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world == null) {
-            return true;
-        }
-
-        client.world.playSound(
-                sound.getX(),
-                sound.getY(),
-                sound.getZ(),
-                SoundEvent.of(cryId),
-                sound.getCategory(),
-                AnimonFixConfig.cryVoiceVolume(),
-                1.0F,
-                false
-        );
         return true;
     }
 
-    private static boolean usesOnlyCobblemonSoundResource(Identifier id) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        WeightedSoundSet soundSet = client.getSoundManager().get(id);
-        if (soundSet == null) {
-            return false;
-        }
-
-        Sound selectedSound = soundSet.getSound(SoundInstance.createRandom());
-        if (selectedSound == SoundManager.MISSING_SOUND || selectedSound == SoundManager.INTENTIONALLY_EMPTY_SOUND) {
-            return false;
-        }
-
-        Identifier soundFile = selectedSound.getIdentifier();
-        Identifier resourceId = Identifier.of(soundFile.getNamespace(), "sounds/" + soundFile.getPath() + ".ogg");
-        List<Resource> resources = client.getResourceManager().getAllResources(resourceId);
-        return !resources.isEmpty() && resources.stream().allMatch(resource -> isCobblemonPack(resource.getPackId()));
+    private static boolean usesOnlyCobblemonSoundResource(SoundInstance instance) {
+        // Use the file selected for this playback, including its highest-priority override.
+        Sound selected = instance.getSound();
+        if (selected == null || selected == SoundManager.EMPTY_SOUND
+                || selected == SoundManager.INTENTIONALLY_EMPTY_SOUND) return false;
+        ResourceLocation file = selected.getLocation();
+        ResourceLocation resource = ResourceLocation.fromNamespaceAndPath(file.getNamespace(), "sounds/" + file.getPath() + ".ogg");
+        return Minecraft.getInstance().getResourceManager().getResource(resource)
+                .map(value -> AmbientResourcePolicy.isBuiltIn(value.sourcePackId())).orElse(false);
     }
 
-    private static boolean isCobblemonPack(String packId) {
-        return packId.toLowerCase(Locale.ROOT).contains("cobblemon");
-    }
-
-    private static boolean hasSoundEvent(Identifier id) {
-        return MinecraftClient.getInstance().getSoundManager().getKeys().contains(id);
-    }
-
-    private static void prune(long now) {
-        Iterator<Map.Entry<String, Long>> iterator = RECENT_CRIES.entrySet().iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().getValue() < now) {
-                iterator.remove();
-            }
-        }
-    }
-
-    private static boolean isPokemonSound(Identifier id) {
+    static boolean isPokemonSound(ResourceLocation id) {
         return "cobblemon".equals(id.getNamespace()) && id.getPath().startsWith("pokemon.");
     }
 
-    private static boolean isPokemonAmbient(Identifier id) {
-        String path = id.getPath();
-        return path.endsWith(".ambient") || path.endsWith("_ambient");
+    static boolean isPokemonAmbient(ResourceLocation id) {
+        return isPokemonSound(id) && (id.getPath().endsWith(".ambient") || id.getPath().endsWith("_ambient"));
     }
 
-    private static boolean isPokemonCry(Identifier id) {
-        String path = id.getPath();
-        return path.endsWith(".cry") || path.endsWith("_cry");
+    static boolean isPokemonCry(ResourceLocation id) {
+        return isPokemonSound(id) && (id.getPath().endsWith(".cry") || id.getPath().endsWith("_cry"));
     }
 
-    private static String basePokemonSoundPath(Identifier id) {
+    static boolean isPokemonBattle(ResourceLocation id) {
+        return isPokemonSound(id) && (id.getPath().endsWith(".battle") || id.getPath().endsWith("_battle"));
+    }
+
+    static String basePokemonSoundPath(ResourceLocation id) {
         String path = id.getPath();
-        if (path.endsWith(".ambient") || path.endsWith(".cry")) {
-            return path.substring(0, path.lastIndexOf('.'));
-        }
-        if (path.endsWith("_ambient")) {
-            return path.substring(0, path.length() - "_ambient".length());
-        }
-        if (path.endsWith("_cry")) {
-            return path.substring(0, path.length() - "_cry".length());
+        for (String kind : new String[]{"ambient", "cry", "battle"}) {
+            if (path.endsWith("." + kind) || path.endsWith("_" + kind)) {
+                return path.substring(0, path.length() - kind.length() - 1);
+            }
         }
         return path;
     }
 
-    private static Identifier toCrySoundId(Identifier id) {
+    private static ResourceLocation toCrySoundId(ResourceLocation id) {
         String path = id.getPath();
-        if (path.endsWith(".ambient")) {
-            return Identifier.of(id.getNamespace(), path.substring(0, path.length() - ".ambient".length()) + ".cry");
-        }
-        if (path.endsWith("_ambient")) {
-            return Identifier.of(id.getNamespace(), path.substring(0, path.length() - "_ambient".length()) + "_cry");
-        }
-        return id;
+        String separator = path.endsWith("_ambient") ? "_" : ".";
+        return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), basePokemonSoundPath(id) + separator + "cry");
     }
 }
