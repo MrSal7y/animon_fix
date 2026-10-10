@@ -14,13 +14,24 @@ public final class ClientPokemonSoundFilter {
     private static final long RECENT_CRY_MS = 1000L;
     private static final double MATCH_DISTANCE_SQUARED = 16.0D;
     private static final RecentVoiceTracker RECENT_CRIES = new RecentVoiceTracker();
+    private static final AmbientStartupGrace STARTUP_GRACE = new AmbientStartupGrace();
     private static ClientLevel soundWorld;
 
     private ClientPokemonSoundFilter() {}
 
     public static void tick(Minecraft client) {
+        updateWorld(client);
+        // Wait until loading screens close before counting playable client ticks.
+        if (client.level != null && client.player != null && client.screen == null
+                && client.getOverlay() == null && !client.isPaused()) {
+            STARTUP_GRACE.tick();
+        }
+    }
+
+    private static void updateWorld(Minecraft client) {
         if (soundWorld != client.level) {
             soundWorld = client.level;
+            STARTUP_GRACE.reset();
             RECENT_CRIES.clear();
             CryAnimationTracker.clear();
             FallbackCryScheduler.clear();
@@ -29,6 +40,8 @@ public final class ClientPokemonSoundFilter {
     }
 
     public static boolean shouldCancel(SoundInstance sound) {
+        // Playback can happen before the first client tick in a newly loaded world.
+        updateWorld(Minecraft.getInstance());
         ResourceLocation id = sound.getLocation();
         if (!isPokemonSound(id)) return false;
         if (isPokemonCry(id)) {
@@ -41,7 +54,7 @@ public final class ClientPokemonSoundFilter {
             return false;
         }
         if (!isPokemonAmbient(id)) return false;
-        if (!AnimonFixConfig.pokemonAmbientSounds()) return true;
+        if (STARTUP_GRACE.suppressAmbient() || !AnimonFixConfig.pokemonAmbientSounds()) return true;
 
         PokemonEntity source = findPokemonAtSound(sound);
         if (hasRecentCry(id, sound.getX(), sound.getY(), sound.getZ(), sound.isRelative())

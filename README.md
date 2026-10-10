@@ -15,6 +15,9 @@ provide separate Pokémon ambient voices and cries.
 
 - Prevents owned or battling Pokémon from playing ambient voices over their cries.
 - Preserves resource-pack ambient voices for wild Pokémon.
+- On Fabric, skips ambient calls during loading and the first five seconds of
+  active gameplay after entering a world or dimension to prevent a loading burst.
+  Normal ambient timing then resumes; cries and other game sounds are unaffected.
 - On NeoForge, gives each wild Pokémon a random quiet period and a chance to skip
   ambient calls for a more natural mix. Calls stay at least Cobblemon’s configured
   ambient interval apart, without generating extra sounds or changing send-out cries.
